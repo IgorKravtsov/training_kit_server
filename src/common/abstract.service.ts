@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { FindOptionsWhere, Repository } from 'typeorm'
+import { DeepPartial, FindOptionsWhere, Repository } from 'typeorm'
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 import { PaginatedResult } from './interfaces'
 import { Id } from './types'
 
@@ -30,7 +31,7 @@ export abstract class AbstractService<T> {
     }
   }
 
-  async create(data: any): Promise<any> {
+  async create(data: DeepPartial<T>): Promise<any> {
     return this.repository.save(data)
   }
 
@@ -38,7 +39,7 @@ export abstract class AbstractService<T> {
     return this.repository.findOne({ relations, where: condition })
   }
 
-  async update(id: Id, data: any): Promise<any> {
+  async update(id: Id, data: QueryDeepPartialEntity<T>): Promise<any> {
     return this.repository.update(id, data)
   }
 
