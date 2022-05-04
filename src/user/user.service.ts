@@ -13,7 +13,7 @@ export class UserService extends AbstractService<User> {
     super(userRepository)
   }
 
-  async paginate(page = 1, relations = []): Promise<PaginatedResult> {
+  async paginate(page = 1, relations = []): Promise<PaginatedResult<User>> {
     const { data, meta } = await super.paginate(page, relations)
     return {
       data: data.map((user) => {

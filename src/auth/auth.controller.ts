@@ -1,15 +1,33 @@
-import { Body, Controller, Post } from '@nestjs/common'
-import { UserService } from 'src/user/user.service'
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
+import { Request, Response } from 'express'
 import * as bcrypt from 'bcrypt'
+
 import { Serialize } from 'src/interceprots/serialize.interceptor'
-import { RegisterDto, UserDto } from './dtos'
+import { UserService } from 'src/user/user.service'
+import { LoginDto, RegisterDto, UserDto } from './dtos'
+import { userInCookie } from 'src/common/constants'
+import { AuthGuard } from './auth.guard'
 
 @Controller('auth')
-@Serialize(UserDto)
 export class AuthController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService,
+  ) {}
 
   @Post('register')
+  @Serialize(UserDto)
   async register(@Body() body: RegisterDto) {
     const hashedPass = await bcrypt.hash(body.password, 12)
     return this.userService.create({
@@ -18,5 +36,49 @@ export class AuthController {
       email: body.email,
       password: hashedPass,
     })
+  }
+
+  @Post('login')
+  @Serialize(UserDto)
+  async login(
+    @Body() body: LoginDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const { email, password } = body
+    const user = await this.userService.findOne({ email })
+
+    if (!user) {
+      throw new NotFoundException('User was not found')
+    }
+
+    if (!(await bcrypt.compare(password, user.password))) {
+      throw new BadRequestException('Invalid credentials')
+    }
+    const jwt_token = await this.jwtService.signAsync({ id: user.id }) // sign more data in future
+    response.cookie(userInCookie, jwt_token, { httpOnly: true })
+
+    return user
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('user')
+  @Serialize(UserDto)
+  async user(@Req() request: Request) {
+    //По сути не нужный метод, но пусть будет :)
+
+    // const cookie = request.cookies[userInCookie]
+    // const verifiedData = await this.jwtService.verifyAsync(cookie)
+    // return this.userService.findOne({ id: verifiedData.id })
+    return request.currentUser
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie(userInCookie)
+
+    return {
+      message: 'Cleared successfully',
+    }
   }
 }
