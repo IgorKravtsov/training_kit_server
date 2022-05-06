@@ -2,7 +2,7 @@ import { Injectable, NestMiddleware } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { Request, Response, NextFunction } from 'express'
 import { userInCookie } from 'src/common/constants'
-import { UserService } from '../user.service'
+import { UserService } from 'src/user/user.service'
 import { User as UserEntity } from 'src/user/user.entity'
 
 declare global {

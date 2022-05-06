@@ -4,9 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { getTypeormConfig } from './config/typeorm.config'
-import { User } from './user/user.entity'
 import { UserModule } from './user/user.module'
-import { CommonModule } from './common/common.module'
 import { AuthModule } from './auth/auth.module'
 
 @Module({
