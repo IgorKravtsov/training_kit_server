@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { Observable } from 'rxjs'
 import { userInCookie } from 'src/common/constants'
 
 @Injectable()
