@@ -15,9 +15,14 @@ import * as bcrypt from 'bcrypt'
 
 import { Serialize } from 'src/interceptors/serialize.interceptor'
 import { UserService } from 'src/user/user.service'
-import { LoginDto, RegisterDto, UserDto } from './dtos'
-import { userInCookie } from 'src/common/constants'
-import { AuthGuard } from './auth.guard'
+import { LoginDto, RegisterDto } from './dtos'
+import {
+  ORGANIZATION_TABLE,
+  SALT_NUMBER,
+  userInCookie,
+} from 'src/common/constants'
+import { AuthGuard } from '../user/guards/auth.guard'
+import { UserDto } from 'src/user/dtos'
 
 @Controller('auth')
 export class AuthController {
@@ -29,12 +34,12 @@ export class AuthController {
   @Post('register')
   @Serialize(UserDto)
   async register(@Body() body: RegisterDto) {
-    const hashedPass = await bcrypt.hash(body.password, 12)
+    const { password, organizations, ...data } = body
+    const hashedPass = await bcrypt.hash(password, SALT_NUMBER)
     return this.userService.create({
-      name: body.name,
-      lastName: body.lastName,
-      email: body.email,
+      ...data,
       password: hashedPass,
+      organizations: organizations.map((id) => ({ id })),
     })
   }
 
@@ -45,7 +50,7 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const { email, password } = body
-    const user = await this.userService.findOne({ email })
+    const user = await this.userService.findOne({ email }, [ORGANIZATION_TABLE])
 
     if (!user) {
       throw new NotFoundException('User was not found')
@@ -78,7 +83,7 @@ export class AuthController {
     response.clearCookie(userInCookie)
 
     return {
-      message: 'Cleared successfully',
+      message: 'Logged out successfully',
     }
   }
 }

@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { AbstractService } from 'src/common/abstract.service'
+import { CHARACTERISTIC_TABLE, ORGANIZATION_TABLE } from 'src/common/constants'
 import { PaginatedResult } from 'src/common/interfaces'
-import { Repository } from 'typeorm'
+import { Id } from 'src/common/types'
+import { FindOptionsWhere, Repository } from 'typeorm'
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
+import { UpdateUserDto } from './dtos/update-user.dto'
 import { User } from './user.entity'
 
 @Injectable()
@@ -22,5 +26,19 @@ export class UserService extends AbstractService<User> {
       }),
       meta,
     }
+  }
+
+  async updateUser(id: Id, body: UpdateUserDto): Promise<User> {
+    const { organizations, ...data } = body
+    console.log(id)
+
+    await super.update(id, {
+      ...data,
+      organizations: organizations?.map((id) => ({ id })),
+    })
+    return await this.userRepository.findOne({
+      where: { id } as any,
+      relations: [ORGANIZATION_TABLE],
+    })
   }
 }

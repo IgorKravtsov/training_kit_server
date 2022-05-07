@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common'
-import { ConfigModule, ConfigService } from '@nestjs/config'
+import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { AppController } from './app.controller'
-import { AppService } from './app.service'
 import { getTypeormConfig } from './config/typeorm.config'
 import { UserModule } from './user/user.module'
 import { AuthModule } from './auth/auth.module'
-import { OrganizationModule } from './organization/organization.module';
+import { OrganizationModule } from './organization/organization.module'
+import { CharacteristicModule } from './characteristic/characteristic.module'
+import { GymModule } from './gym/gym.module';
 
 @Module({
   imports: [
@@ -25,8 +25,10 @@ import { OrganizationModule } from './organization/organization.module';
     UserModule,
     AuthModule,
     OrganizationModule,
+    CharacteristicModule,
+    GymModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

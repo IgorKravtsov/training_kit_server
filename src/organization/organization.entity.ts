@@ -1,10 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity } from 'typeorm'
+import { CommonEntity } from 'src/common/entities'
+import { ORGANIZATION_TABLE } from 'src/common/constants'
 
-@Entity('organizations')
-export class Organization {
-  @PrimaryGeneratedColumn()
-  id: number
-
+@Entity(ORGANIZATION_TABLE)
+export class Organization extends CommonEntity {
   @Column()
   title: string
 

@@ -5,10 +5,11 @@ import { UploadController } from 'src/user/upload.controller'
 import { CurrentUserMiddleware } from './middleware/current-user.middleware'
 import { User } from './user.entity'
 import { UserService } from './user.service'
+import { UserController } from './user.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), CommonModule],
-  controllers: [UploadController],
+  controllers: [UploadController, UserController],
   providers: [UserService],
   exports: [UserService],
 })

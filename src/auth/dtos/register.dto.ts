@@ -1,4 +1,10 @@
-import { IsEmail, IsNotEmpty } from 'class-validator'
+import {
+  ArrayMinSize,
+  IsArray,
+  IsEmail,
+  IsNotEmpty,
+  IsNumber,
+} from 'class-validator'
 
 export class RegisterDto {
   @IsNotEmpty()
@@ -13,4 +19,9 @@ export class RegisterDto {
 
   @IsNotEmpty()
   password: string
+
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsNumber({}, { each: true })
+  organizations: number[]
 }
