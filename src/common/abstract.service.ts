@@ -55,7 +55,10 @@ export abstract class AbstractService<T extends { id: Id }> {
     return await this.repository.update(id, data)
   }
 
-  async delete(id: Id): Promise<DeleteResult> {
-    return this.repository.delete(id)
+  async delete(id: Id): Promise<any> {
+    await this.repository.delete(id)
+    return {
+      message: `Successfully deleted instance with id: '${id}'`,
+    }
   }
 }

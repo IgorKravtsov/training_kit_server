@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module'
 import { OrganizationModule } from './organization/organization.module'
 import { CharacteristicModule } from './characteristic/characteristic.module'
 import { GymModule } from './gym/gym.module';
+import { TrainingModule } from './training/training.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { GymModule } from './gym/gym.module';
     OrganizationModule,
     CharacteristicModule,
     GymModule,
+    TrainingModule,
   ],
   controllers: [],
   providers: [],
