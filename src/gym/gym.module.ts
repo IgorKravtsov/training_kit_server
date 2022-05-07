@@ -1,9 +1,12 @@
-import { Module } from '@nestjs/common';
-import { GymController } from './gym.controller';
-import { GymService } from './gym.service';
+import { Module } from '@nestjs/common'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { GymController } from './gym.controller'
+import { Gym } from './gym.entity'
+import { GymService } from './gym.service'
 
 @Module({
+  imports: [TypeOrmModule.forFeature([Gym])],
   controllers: [GymController],
-  providers: [GymService]
+  providers: [GymService],
 })
 export class GymModule {}
