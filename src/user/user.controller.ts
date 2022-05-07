@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Param, Put } from '@nestjs/common'
 import { Id } from 'src/common/types'
-import { Serialize } from 'src/interceptors'
+import { Serialize } from 'src/helpers/interceptors'
 import { UserDto } from './dtos'
 import { UpdateUserDto } from './dtos/update-user.dto'
 import { UserService } from './user.service'

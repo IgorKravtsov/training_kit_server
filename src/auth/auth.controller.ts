@@ -13,7 +13,7 @@ import { JwtService } from '@nestjs/jwt'
 import { Request, Response } from 'express'
 import * as bcrypt from 'bcrypt'
 
-import { Serialize } from 'src/interceptors/serialize.interceptor'
+import { Serialize } from 'src/helpers/interceptors/serialize.interceptor'
 import { UserService } from 'src/user/user.service'
 import { LoginDto, RegisterDto } from './dtos'
 import {
