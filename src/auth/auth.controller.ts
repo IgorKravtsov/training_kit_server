@@ -23,24 +23,37 @@ import {
 } from 'src/common/constants'
 import { AuthGuard } from '../user/guards/auth.guard'
 import { UserDto } from 'src/user/dtos'
+import { OrganizationService } from 'src/organization/organization.service'
+import { transformUser } from 'src/utils/transform'
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
+    private organizationService: OrganizationService,
   ) {}
 
   @Post('register')
-  @Serialize(UserDto)
-  async register(@Body() body: RegisterDto) {
-    const { password, organizations, ...data } = body
+  // @Serialize(UserDto)
+  async register(@Body() body: RegisterDto): Promise<UserDto> {
+    const { password, organizations: organizationIds, ...data } = body
+
+    const { entities: organizations, isRangeCorrect: isRangePass } =
+      await this.organizationService.findInRangeId(organizationIds)
+    if (!isRangePass) {
+      throw new BadRequestException('Заданы неверные id организации(-й)')
+    }
+
     const hashedPass = await bcrypt.hash(password, SALT_NUMBER)
-    return this.userService.create({
+
+    const newUser = await this.userService.create({
       ...data,
       password: hashedPass,
-      organizations: organizations.map((id) => ({ id })),
+      organizations,
     })
+
+    return transformUser(newUser)
   }
 
   @Post('login')
@@ -48,7 +61,7 @@ export class AuthController {
   async login(
     @Body() body: LoginDto,
     @Res({ passthrough: true }) response: Response,
-  ) {
+  ): Promise<UserDto> {
     const { email, password } = body
     const user = await this.userService.findOne({ email }, [ORGANIZATION_TABLE])
 
@@ -62,7 +75,7 @@ export class AuthController {
     const jwt_token = await this.jwtService.signAsync({ id: user.id }) // sign more data in future
     response.cookie(userInCookie, jwt_token, { httpOnly: true })
 
-    return user
+    return transformUser(user)
   }
 
   @UseGuards(AuthGuard)

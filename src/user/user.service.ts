@@ -4,9 +4,10 @@ import { AbstractService } from 'src/common/abstract.service'
 import { CHARACTERISTIC_TABLE, ORGANIZATION_TABLE } from 'src/common/constants'
 import { PaginatedResult } from 'src/common/interfaces'
 import { Id } from 'src/common/types'
-import { FindOptionsWhere, Repository } from 'typeorm'
+import { FindOptionsOrder, FindOptionsWhere, In, Repository } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 import { UpdateUserDto } from './dtos/update-user.dto'
+import { UserRoles } from './enums'
 import { User } from './user.entity'
 
 @Injectable()
@@ -40,5 +41,20 @@ export class UserService extends AbstractService<User> {
       where: { id } as any,
       relations: [ORGANIZATION_TABLE],
     })
+  }
+
+  async findInRangeId(
+    ids: Id[],
+    orderBy?: FindOptionsOrder<User>,
+    roles?: UserRoles[],
+  ): Promise<{ entities: User[]; isRangeCorrect: boolean }> {
+    const entities = await this.repository.find({
+      where: { id: In(ids), role: In(roles) },
+      order: orderBy,
+    })
+    return {
+      entities,
+      isRangeCorrect: entities.length === ids.length,
+    }
   }
 }

@@ -1,7 +1,9 @@
 import {
-  IsDate,
+  ArrayMinSize,
+  IsArray,
   IsDateString,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator'
@@ -23,4 +25,9 @@ export class CreateTrainingDto {
 
   @IsNotEmpty()
   gymId: Id
+
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsNumber({}, { each: true })
+  trainers: Id[]
 }

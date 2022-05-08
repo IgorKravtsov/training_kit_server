@@ -7,6 +7,12 @@ import { User } from 'src/user/user.entity'
 @Entity(TRAINING_TABLE)
 export class Training extends CommonEntity {
   @Column()
+  title: string
+
+  @Column()
+  description: string
+
+  @Column()
   trainingDate: Date
 
   @Column()
@@ -17,9 +23,17 @@ export class Training extends CommonEntity {
 
   @ManyToMany(() => User, { onDelete: 'NO ACTION' })
   @JoinTable({
-    name: 'training_user',
+    name: 'training_learner',
     joinColumn: { name: 'trainingId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'userId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'learnerId', referencedColumnName: 'id' },
   })
   learners: User[]
+
+  @ManyToMany(() => User, { onDelete: 'NO ACTION' })
+  @JoinTable({
+    name: 'training_trainer',
+    joinColumn: { name: 'trainingId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'trainerId', referencedColumnName: 'id' },
+  })
+  trainers: User[]
 }

@@ -1,6 +1,6 @@
 import { Expose, Transform } from 'class-transformer'
 import { Id } from 'src/common/types'
-import { Organization } from 'src/organization/organization.entity'
+import { OrganizationDto } from 'src/organization/dtos'
 
 export class UserDto {
   @Expose()
@@ -15,5 +15,5 @@ export class UserDto {
 
   @Transform(({ obj }) => obj.organizations)
   @Expose()
-  organizations: Organization[]
+  organizations: OrganizationDto[]
 }
