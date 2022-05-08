@@ -54,7 +54,7 @@ export class UserService extends AbstractService<User> {
     })
     return {
       entities,
-      isRangeCorrect: entities.length === ids.length,
+      isRangeCorrect: entities.length >= ids.length,
     }
   }
 }

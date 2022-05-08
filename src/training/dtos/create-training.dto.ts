@@ -15,7 +15,7 @@ export class CreateTrainingDto {
 
   @IsString()
   @IsOptional()
-  descriprion?: string
+  description?: string
 
   @IsDateString()
   trainingDate: Date

@@ -6,8 +6,9 @@ import { UserModule } from './user/user.module'
 import { AuthModule } from './auth/auth.module'
 import { OrganizationModule } from './organization/organization.module'
 import { CharacteristicModule } from './characteristic/characteristic.module'
-import { GymModule } from './gym/gym.module';
-import { TrainingModule } from './training/training.module';
+import { GymModule } from './gym/gym.module'
+import { TrainingModule } from './training/training.module'
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { TrainingModule } from './training/training.module';
     CharacteristicModule,
     GymModule,
     TrainingModule,
+    SeedModule,
   ],
   controllers: [],
   providers: [],

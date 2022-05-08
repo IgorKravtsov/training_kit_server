@@ -10,5 +10,6 @@ import { GymModule } from 'src/gym/gym.module'
   imports: [TypeOrmModule.forFeature([Training]), UserModule, GymModule],
   providers: [TrainingService],
   controllers: [TrainingController],
+  exports: [TrainingService],
 })
 export class TrainingModule {}
