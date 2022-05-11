@@ -5,6 +5,8 @@ import {
   Post,
 } from '@nestjs/common'
 import * as bcrypt from 'bcrypt'
+import { AbonementService } from 'src/abonement/abonement.service'
+import { CreateAbonementDto } from 'src/abonement/dtos/create-abonement.dto'
 import { CharacteristicService } from 'src/characteristic/characteristic.service'
 import { CreateCharDto } from 'src/characteristic/dtos'
 import { CharacteristicType } from 'src/characteristic/enums'
@@ -27,6 +29,7 @@ export class SeedController {
     private gymService: GymService,
     private characteristicService: CharacteristicService,
     private trainingService: TrainingService,
+    private abonementService: AbonementService,
   ) {}
 
   @Post('organizations')
@@ -50,11 +53,34 @@ export class SeedController {
       {
         title: 'Ден-Макс (Покровск)',
         address: 'ул. Пушкина, 12',
+        trainers: [2, 3],
+      },
+      {
+        title: 'Сокол (Кропивницкий)',
+        address: 'ул. Соколова, 15',
+        trainers: [2],
+      },
+      {
+        title: 'Сокол-2 (Кропивницкий)',
+        address: 'ул. Соколова, 15А',
+        trainers: [2, 3],
       },
     ]
 
     for (const g of seedGyms) {
-      await this.gymService.create(g)
+      const { trainers: trainerIds, ...data } = g
+      const { entities: trainers, isRangeCorrect } =
+        await this.userService.findInRangeId(trainerIds, {}, [
+          UserRoles.TRAINER,
+          UserRoles.ADMIN,
+        ])
+      if (!isRangeCorrect) {
+        throw new BadRequestException('Заданы не верные id тренеров')
+      }
+      await this.gymService.create({
+        ...data,
+        trainers,
+      })
     }
 
     return 'Gyms seeded successfully'
@@ -127,7 +153,9 @@ export class SeedController {
       const { userId, ...data } = c
       const user = await this.userService.findOne({ id: userId } as any)
       if (!user) {
-        throw new BadRequestException(`[seedCharacteristics] Не найден пользователь с id: ${userId}`)
+        throw new BadRequestException(
+          `[seedCharacteristics] Не найден пользователь с id: ${userId}`,
+        )
       }
       await this.characteristicService.create({
         ...data,
@@ -172,7 +200,9 @@ export class SeedController {
 
       const gym = await this.gymService.findOne({ id: gymId as nowId })
       if (!gym) {
-        throw new NotFoundException(`[seedTrainings] Не найден зал с id: '${gymId}'`)
+        throw new NotFoundException(
+          `[seedTrainings] Не найден зал с id: '${gymId}'`,
+        )
       }
 
       const { entities: trainers, isRangeCorrect } =
@@ -181,7 +211,9 @@ export class SeedController {
           UserRoles.ADMIN,
         ])
       if (!isRangeCorrect) {
-        throw new NotFoundException(`[seedTrainings] Заданы неверные id тренера(-ов)`)
+        throw new NotFoundException(
+          `[seedTrainings] Заданы неверные id тренера(-ов)`,
+        )
       }
 
       const newTraining = await this.trainingService.create({
@@ -195,20 +227,78 @@ export class SeedController {
     return 'Trainings seeded successfully'
   }
 
+  @Post('abonements')
+  async seedAbonements() {
+    const seedAbonements: CreateAbonementDto[] = [
+      {
+        title: 'Месячный стандарт (Покровск)',
+        price: 100,
+        amountDays: 20,
+        amountTrainings: 20,
+        creator: 2,
+        gym: 1,
+      },
+      {
+        title: 'Недельный стандарт (Покровск)',
+        price: 40,
+        amountDays: 7,
+        amountTrainings: 3,
+        creator: 3,
+        gym: 1,
+      },
+      {
+        title: 'Месячный премиум (Кропивницкий)',
+        price: 150,
+        amountDays: 30,
+        // amountTrainings: 0,
+        creator: 2,
+        gym: 2,
+      },
+    ]
+
+    for (const a of seedAbonements) {
+      const { creator: creatorId, gym: gymId, ...data } = a
+
+      const gym = await this.gymService.findOne({ id: gymId as nowId })
+      if (!gym) {
+        throw new NotFoundException(
+          `[seedAbonements] Не найден зал с id: '${gymId}'`,
+        )
+      }
+
+      const creator = await this.userService.findOne({ id: creatorId as nowId })
+      if (!gym) {
+        throw new NotFoundException(
+          `[seedAbonements] Не найден зал с id: '${creatorId}'`,
+        )
+      }
+
+      await this.abonementService.create({
+        ...data,
+        gym,
+        creator,
+      })
+    }
+
+    return 'Abonements seeded successfully'
+  }
+
   @Post('all')
   async seedAll() {
     const orgMessage = await this.seedOrganizations()
-    const gymsMessage = await this.seedGyms()
     const usersMessage = await this.seedUsers()
+    const gymsMessage = await this.seedGyms()
     const charsMessage = await this.seedCharacteristics()
     const trainingsMessage = await this.seedTrainings()
+    const abonementsMessage = await this.seedAbonements()
 
     return `===============================================
     ${orgMessage}
-    ${gymsMessage}
     ${usersMessage}
+    ${gymsMessage}
     ${charsMessage}
     ${trainingsMessage}
+    ${abonementsMessage}
     ===============================================`
   }
 }

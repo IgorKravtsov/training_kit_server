@@ -1,8 +1,17 @@
 // import { Expose } from 'class-transformer'
+import { Abonement } from 'src/abonement/abonement.entity'
+import { LearnerAbonement } from 'src/abonement/learner-abonement.entity'
 import { USER_TABLE } from 'src/common/constants'
 import { CommonEntity } from 'src/common/entities'
 import { Organization } from 'src/organization/organization.entity'
-import { Column, Entity, JoinTable, ManyToMany } from 'typeorm'
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm'
 import { UserRoles } from './enums'
 
 @Entity(USER_TABLE)
@@ -29,6 +38,14 @@ export class User extends CommonEntity {
     inverseJoinColumn: { name: 'organizationId', referencedColumnName: 'id' },
   })
   organizations: Organization[]
+
+  @OneToMany(() => Abonement, (a) => a.creator)
+  abonements: Abonement[]
+
+  @OneToMany(() => LearnerAbonement, (la) => la.learner)
+  learnerAbonements: LearnerAbonement[]
+
+  // @OneToMany(() => Abonement, )
 
   // @Expose()
   // get displayName(): string {

@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString } from 'class-validator'
+import { IsArray, IsNotEmpty, IsString } from 'class-validator'
+import { Id } from 'src/common/types'
 
 export class CreateGymDto {
   @IsNotEmpty()
@@ -8,4 +9,8 @@ export class CreateGymDto {
   @IsNotEmpty()
   @IsString()
   address: string
+
+  @IsArray()
+  @IsNotEmpty()
+  trainers: Id[]
 }

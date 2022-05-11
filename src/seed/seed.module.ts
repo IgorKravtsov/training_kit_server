@@ -5,6 +5,7 @@ import { GymModule } from 'src/gym/gym.module'
 import { CharacteristicModule } from 'src/characteristic/characteristic.module'
 import { OrganizationModule } from 'src/organization/organization.module'
 import { TrainingModule } from 'src/training/training.module'
+import { AbonementModule } from 'src/abonement/abonement.module'
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { TrainingModule } from 'src/training/training.module'
     CharacteristicModule,
     OrganizationModule,
     TrainingModule,
+    AbonementModule,
   ],
   providers: [],
   controllers: [SeedController],

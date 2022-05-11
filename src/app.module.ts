@@ -8,7 +8,8 @@ import { OrganizationModule } from './organization/organization.module'
 import { CharacteristicModule } from './characteristic/characteristic.module'
 import { GymModule } from './gym/gym.module'
 import { TrainingModule } from './training/training.module'
-import { SeedModule } from './seed/seed.module';
+import { SeedModule } from './seed/seed.module'
+import { AbonementModule } from './abonement/abonement.module'
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { SeedModule } from './seed/seed.module';
     GymModule,
     TrainingModule,
     SeedModule,
+    AbonementModule,
   ],
   controllers: [],
   providers: [],

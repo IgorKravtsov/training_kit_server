@@ -57,7 +57,7 @@ export class AuthController {
   }
 
   @Post('login')
-  @Serialize(UserDto)
+  // @Serialize(UserDto)
   async login(
     @Body() body: LoginDto,
     @Res({ passthrough: true }) response: Response,
