@@ -7,18 +7,24 @@ import {
 } from '@nestjs/common'
 import { nowId } from 'src/common/types'
 import { TrainerGuard } from 'src/user/guards'
+import {
+  transformAbonement,
+  transformLearnerAbonement,
+} from 'src/utils/transform'
 import { UserService } from 'src/user/user.service'
-import { transformAbonement } from 'src/utils/transform/abonement.transform'
+import { GymService } from 'src/gym/gym.service'
 import { AbonementService } from './abonement.service'
-import { AbonementDto } from './dtos/abonement.dto'
-import { CreateAbonementDto } from './dtos/create-abonement.dto'
+import { LearnerAbonementService } from './learner-abonement.service'
+import { AbonementDto, AssignAbonementDto, CreateAbonementDto } from './dtos'
+import { LearnerAbonementDto } from './dtos/learner-abonement.dto'
 
 @Controller('abonement')
 export class AbonementController {
   constructor(
     private userService: UserService,
-    private gymService: UserService,
+    private gymService: GymService,
     private abonementService: AbonementService,
+    private learnerAbonementService: LearnerAbonementService,
   ) {}
 
   @Post('create')
@@ -43,5 +49,33 @@ export class AbonementController {
     })
 
     return transformAbonement(newAbonement)
+  }
+
+  @Post('assign-abonement')
+  async assignAbonement(
+    @Body() body: AssignAbonementDto,
+  ): Promise<LearnerAbonementDto> {
+    const { abonement: abonementId, learner: learnerId, ...data } = body
+
+    const abonement = await this.abonementService.findOne({
+      id: abonementId as nowId,
+    })
+    if (!abonement) {
+      throw new BadRequestException(`Не найден абонемент с id: ${abonementId}`)
+    }
+
+    const learner = await this.userService.findOne({ id: learnerId as nowId })
+    if (!learner) {
+      throw new BadRequestException(
+        `Не найден пользователь с id: ${abonementId}`,
+      )
+    }
+    const newAssignedAbonement = await this.learnerAbonementService.create({
+      ...data,
+      learner,
+      abonement,
+    })
+
+    return transformLearnerAbonement(newAssignedAbonement)
   }
 }
