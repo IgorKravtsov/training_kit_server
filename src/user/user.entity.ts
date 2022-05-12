@@ -32,10 +32,10 @@ export class User extends CommonEntity {
   })
   organizations: Organization[]
 
-  @OneToMany(() => Abonement, (a) => a.creator)
+  @OneToMany(() => Abonement, (a) => a.creator) //Field for creators of abonements
   abonements: Abonement[]
 
-  @OneToMany(() => LearnerAbonement, (la) => la.learner)
+  @OneToMany(() => LearnerAbonement, (la) => la.learner) //Field for assigned abonements
   learnerAbonements: LearnerAbonement[]
 
   // @OneToMany(() => Abonement, )

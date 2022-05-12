@@ -20,6 +20,8 @@ import { CreateTrainingDto } from 'src/training/dtos'
 import { TrainingService } from 'src/training/training.service'
 import { UserRoles } from 'src/user/enums'
 import { UserService } from 'src/user/user.service'
+import { AssignAbonementDto } from '../abonement/dtos'
+import { LearnerAbonementService } from '../abonement/learner-abonement.service'
 
 @Controller('seed')
 export class SeedController {
@@ -30,6 +32,7 @@ export class SeedController {
     private characteristicService: CharacteristicService,
     private trainingService: TrainingService,
     private abonementService: AbonementService,
+    private learnerAbonementService: LearnerAbonementService,
   ) {}
 
   @Post('organizations')
@@ -283,6 +286,43 @@ export class SeedController {
     return 'Abonements seeded successfully'
   }
 
+  @Post('learner-abonements')
+  async seedLearnerAbonements() {
+    const seedLearnerAbonements: AssignAbonementDto[] = [
+      {
+        learner: 1,
+        abonement: 1,
+      },
+    ]
+
+    for (const la of seedLearnerAbonements) {
+      const { learner: learnerId, abonement: abonementId } = la
+
+      const abonement = await this.abonementService.findOne({
+        id: abonementId as nowId,
+      })
+      if (!abonement) {
+        throw new BadRequestException(
+          `Не найден абонемент с id: ${abonementId}`,
+        )
+      }
+
+      const learner = await this.userService.findOne({ id: learnerId as nowId })
+      if (!learner) {
+        throw new BadRequestException(
+          `Не найден пользователь с id: ${abonementId}`,
+        )
+      }
+      await this.learnerAbonementService.create({
+        trainingsLeft: abonement.amountTrainings,
+        daysLeft: abonement.amountDays,
+        learner,
+        abonement,
+      })
+    }
+    return 'Learner-abonements seeded successfully'
+  }
+
   @Post('all')
   async seedAll() {
     const orgMessage = await this.seedOrganizations()
@@ -291,6 +331,7 @@ export class SeedController {
     const charsMessage = await this.seedCharacteristics()
     const trainingsMessage = await this.seedTrainings()
     const abonementsMessage = await this.seedAbonements()
+    const learnerAbonementsMessage = await this.seedLearnerAbonements()
 
     return `===============================================
     ${orgMessage}
@@ -299,6 +340,7 @@ export class SeedController {
     ${charsMessage}
     ${trainingsMessage}
     ${abonementsMessage}
+    ${learnerAbonementsMessage}
     ===============================================`
   }
 }

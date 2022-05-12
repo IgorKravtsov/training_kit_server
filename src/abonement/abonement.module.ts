@@ -16,6 +16,6 @@ import { LearnerAbonementService } from './learner-abonement.service'
   ],
   controllers: [AbonementController],
   providers: [AbonementService, LearnerAbonementService],
-  exports: [AbonementService],
+  exports: [AbonementService, LearnerAbonementService],
 })
 export class AbonementModule {}

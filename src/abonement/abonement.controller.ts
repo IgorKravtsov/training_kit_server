@@ -54,8 +54,8 @@ export class AbonementController {
   @Post('assign-abonement')
   async assignAbonement(
     @Body() body: AssignAbonementDto,
-  ): Promise<LearnerAbonementDto> {
-    const { abonement: abonementId, learner: learnerId, ...data } = body
+  ): Promise<Omit<LearnerAbonementDto, 'learner' | 'abonement'>> {
+    const { abonement: abonementId, learner: learnerId } = body
 
     const abonement = await this.abonementService.findOne({
       id: abonementId as nowId,
@@ -71,10 +71,13 @@ export class AbonementController {
       )
     }
     const newAssignedAbonement = await this.learnerAbonementService.create({
-      ...data,
+      trainingsLeft: abonement.amountTrainings,
+      daysLeft: abonement.amountDays,
       learner,
       abonement,
     })
+
+    // console.log(newAssignedAbonement)
 
     return transformLearnerAbonement(newAssignedAbonement)
   }

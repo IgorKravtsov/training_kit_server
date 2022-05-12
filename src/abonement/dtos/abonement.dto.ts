@@ -20,8 +20,8 @@ export class AbonementDto {
   amountTrainings?: number
 
   @Expose()
-  creator: PublicUserDto
+  creator?: PublicUserDto
 
   @Expose()
-  gym: GymDto
+  gym?: GymDto
 }
