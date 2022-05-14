@@ -70,14 +70,20 @@ export class AbonementController {
         `Не найден пользователь с id: ${abonementId}`,
       )
     }
+
+    let endDate: Date | null = null
+    if (abonement.amountDays !== null) {
+      const date = new Date()
+      date.setDate(date.getDate() + abonement.amountDays)
+      endDate = date
+    }
     const newAssignedAbonement = await this.learnerAbonementService.create({
-      trainingsLeft: abonement.amountTrainings,
-      daysLeft: abonement.amountDays,
       learner,
       abonement,
+      trainingsLeft: abonement.amountTrainings,
+      daysLeft: abonement.amountDays,
+      endDate,
     })
-
-    // console.log(newAssignedAbonement)
 
     return transformLearnerAbonement(newAssignedAbonement)
   }

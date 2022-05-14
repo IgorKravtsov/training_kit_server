@@ -12,6 +12,9 @@ export class LearnerAbonement extends CommonEntity {
   @Column({ nullable: true })
   daysLeft?: number
 
+  @Column({ nullable: true })
+  endDate?: Date
+
   @ManyToOne(() => User, (u) => u.learnerAbonements)
   learner: User
 

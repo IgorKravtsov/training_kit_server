@@ -303,19 +303,27 @@ export class SeedController {
       })
       if (!abonement) {
         throw new BadRequestException(
-          `Не найден абонемент с id: ${abonementId}`,
+          `[seedLearnerAbonements] Не найден абонемент с id: ${abonementId}`,
         )
       }
 
       const learner = await this.userService.findOne({ id: learnerId as nowId })
       if (!learner) {
         throw new BadRequestException(
-          `Не найден пользователь с id: ${abonementId}`,
+          `[seedLearnerAbonements] Не найден пользователь с id: ${abonementId}`,
         )
+      }
+
+      let endDate: Date | null = null
+      if (abonement.amountDays !== null) {
+        const date = new Date()
+        date.setDate(date.getDate() + abonement.amountDays)
+        endDate = date
       }
       await this.learnerAbonementService.create({
         trainingsLeft: abonement.amountTrainings,
         daysLeft: abonement.amountDays,
+        endDate,
         learner,
         abonement,
       })
