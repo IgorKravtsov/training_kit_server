@@ -24,7 +24,7 @@ import {
   TRAINERS_RELATION,
   USER_IN_COOKIE,
 } from 'src/common/constants'
-import { AuthGuard } from '../user/guards/auth.guard'
+import { AuthGuard } from 'src/user/guards'
 import { UserDto } from 'src/user/dtos'
 import { OrganizationService } from 'src/organization/organization.service'
 import { transformUser } from 'src/utils/transform'
