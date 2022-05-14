@@ -13,6 +13,9 @@ export class Gym extends CommonEntity {
   @Column({ unique: true })
   address: string
 
+  @Column({ nullable: true })
+  img?: string
+
   @OneToMany(() => Training, (training) => training.gym)
   trainings: Training[]
 

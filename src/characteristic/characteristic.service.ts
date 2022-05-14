@@ -12,4 +12,14 @@ export class CharacteristicService extends AbstractService<Characteristic> {
   ) {
     super(characteristicRepository)
   }
+
+  // transformCharacteristic(chars: Characteristic[]): CharacteristicDto[] {
+  //   return chars.map((c) => ({
+  //     ...c,
+  //     data: {
+  //       labels: [],
+  //       values: []
+  //     },
+  //   }))
+  // }
 }

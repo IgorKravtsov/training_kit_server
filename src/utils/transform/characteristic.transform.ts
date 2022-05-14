@@ -13,3 +13,14 @@ export const transformCharacteristic = (
     user: user && transformPublicUser(user),
   }
 }
+
+export const transformCharacteristicOnly = (
+  characteristic: Characteristic,
+): CharacteristicDto => {
+  const { id, title, type, user } = characteristic
+  return {
+    id,
+    title,
+    type,
+  }
+}

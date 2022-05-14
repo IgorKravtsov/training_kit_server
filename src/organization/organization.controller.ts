@@ -14,7 +14,7 @@ import {
   GetOrganizationsByEmail,
   GetOrganizationsByEmailResponse,
   GetOrganizationsResponse,
-} from './dtos/requests'
+} from './types'
 
 @Controller('organization')
 export class OrganizationController {
@@ -47,7 +47,7 @@ export class OrganizationController {
     ])
     if (!user) {
       throw new BadRequestException(
-        `Пользователь с email: ${body.email} не найден`,
+        `Пользователь с email: '${body.email}' не найден`,
       )
     }
 

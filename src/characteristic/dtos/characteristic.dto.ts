@@ -1,7 +1,8 @@
 import { Expose } from 'class-transformer'
 import { PublicUserDto } from 'src/user/dtos'
-import { CharacteristicType } from '../enums'
+import { CharacteristicType } from 'src/characteristic/enums'
 import { Id } from 'src/common/types'
+import { CharacteristicData } from 'src/characteristic/types'
 
 export class CharacteristicDto {
   @Expose()
@@ -14,5 +15,8 @@ export class CharacteristicDto {
   type: CharacteristicType
 
   @Expose()
-  user: PublicUserDto
+  user?: PublicUserDto
+
+  @Expose()
+  data?: CharacteristicData
 }

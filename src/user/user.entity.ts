@@ -70,7 +70,7 @@ export class User extends CommonEntity {
   })
   organizations: Organization[]
 
-  @ManyToMany(() => Organization, { onDelete: 'SET NULL' })
+  @ManyToMany(() => Gym, { onDelete: 'SET NULL' })
   @JoinTable({
     name: TRAINER_GYM_TABLE,
     joinColumn: { name: 'trainerId', referencedColumnName: 'id' },

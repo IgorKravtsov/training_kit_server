@@ -11,7 +11,7 @@ export class AdminGuard implements CanActivate {
     return user?.role === UserRoles.ADMIN
 
     // try {
-    //   const jwt = request.cookies[userInCookie]
+    //   const jwt = types.cookies[userInCookie]
     //   return await this.jwtService.verifyAsync(jwt)
     // } catch (e) {
     //   return false

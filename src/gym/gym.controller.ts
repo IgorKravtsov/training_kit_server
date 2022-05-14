@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  NotFoundException,
   Post,
   UseGuards,
 } from '@nestjs/common'
@@ -10,9 +11,15 @@ import { UserRoles } from 'src/user/enums'
 import { TrainerGuard } from 'src/user/guards'
 import { UserService } from 'src/user/user.service'
 import { transformGym } from 'src/utils/transform'
-import { GetLearnerGymsDto, GetTrainerGymsDto, GymDto } from './dtos'
-import { CreateGymDto } from './dtos/create-gym.dto'
+import { GYMS_RELATION } from 'src/common/constants'
+import { CreateGymDto, GymDto } from './dtos'
 import { GymService } from './gym.service'
+import {
+  GetLearnerGymsRequest,
+  GetLearnerGymsResponse,
+  GetTrainerGymsRequest,
+  GetTrainerGymsResponse,
+} from './types'
 
 @Controller('gym')
 export class GymController {
@@ -48,22 +55,49 @@ export class GymController {
     return transformGym(newGym)
   }
 
+  // @Get('trainer-gyms')
+
   @Post('trainer-gyms')
   // @UseGuards(TrainerGuard)
-  async getTrainerGyms(@Body() body: GetTrainerGymsDto): Promise<GymDto[]> {
-    const gyms = await this.gymService.findMany({
-      trainers: { id: body.trainerId as nowId },
-    })
+  async getTrainerGyms(
+    @Body() body: GetTrainerGymsRequest,
+  ): Promise<GetTrainerGymsResponse> {
+    const trainer = await this.userService.findOne(
+      { id: body.trainerId as nowId },
+      [GYMS_RELATION],
+    )
 
-    return gyms.map((gym) => transformGym(gym))
+    if (!trainer) {
+      throw new BadRequestException(`Тренер с id: ${body.trainerId} не найден`)
+    }
+
+    if (!trainer.gyms || trainer.gyms.length === 0) {
+      throw new NotFoundException(
+        `У тренера с id: ${body.trainerId} не найдено залов`,
+      )
+    }
+
+    return {
+      gyms: trainer.gyms.map((gym) => transformGym(gym)),
+    }
   }
 
   @Post('learner-gyms')
-  async getLearnerGyms(@Body() body: GetLearnerGymsDto): Promise<GymDto[]> {
+  async getLearnerGyms(
+    @Body() body: GetLearnerGymsRequest,
+  ): Promise<GetLearnerGymsResponse> {
     const gyms = await this.gymService.findMany({
       trainers: body.trainers.map((id) => ({ id })) as any,
     })
 
-    return gyms.map((gym) => transformGym(gym))
+    if (!gyms) {
+      throw new NotFoundException(
+        `У тренеров с id среди: '${body.trainers}' не найдено залов`,
+      )
+    }
+
+    return {
+      gyms: gyms.map((gym) => transformGym(gym)),
+    }
   }
 }

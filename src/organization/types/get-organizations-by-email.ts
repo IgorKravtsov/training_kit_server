@@ -1,5 +1,5 @@
 import { IsEmail } from 'class-validator'
-import { OrganizationDto } from '../organization.dto'
+import { OrganizationDto } from 'src/organization/dtos'
 
 export class GetOrganizationsByEmail {
   @IsEmail()
