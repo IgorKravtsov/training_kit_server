@@ -9,9 +9,11 @@ import {
 } from 'typeorm'
 import { Abonement } from 'src/abonement/abonement.entity'
 import { LearnerAbonement } from 'src/abonement/learner-abonement.entity'
-import { USER_TABLE } from 'src/common/constants'
+import { TRAINER_GYM_TABLE, USER_TABLE } from 'src/common/constants'
 import { CommonEntity } from 'src/common/entities'
 import { Organization } from 'src/organization/organization.entity'
+import { Gym } from 'src/gym/gym.entity'
+import { Characteristic } from 'src/characteristic/characteristic.entity'
 import { LanguageType, UserRoles } from './enums'
 
 @Entity(USER_TABLE)
@@ -46,6 +48,9 @@ export class User extends CommonEntity {
   @OneToMany(() => LearnerAbonement, (la) => la.learner) //Field for assigned abonements
   learnerAbonements: LearnerAbonement[]
 
+  @OneToMany(() => Characteristic, (c) => c.user)
+  characteristics: Characteristic[]
+
   // @ManyToOne(() => User, (u) => u.trainer)
   // trainer: User
 
@@ -64,6 +69,14 @@ export class User extends CommonEntity {
     inverseJoinColumn: { name: 'organizationId', referencedColumnName: 'id' },
   })
   organizations: Organization[]
+
+  @ManyToMany(() => Organization, { onDelete: 'SET NULL' })
+  @JoinTable({
+    name: TRAINER_GYM_TABLE,
+    joinColumn: { name: 'trainerId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'gymId', referencedColumnName: 'id' },
+  })
+  gyms: Gym[]
 
   // @OneToMany(() => Abonement, )
 

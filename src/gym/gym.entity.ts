@@ -1,5 +1,5 @@
 import { Column, Entity, JoinTable, ManyToMany, OneToMany } from 'typeorm'
-import { GYM_TABLE } from 'src/common/constants'
+import { GYM_TABLE, TRAINER_GYM_TABLE } from 'src/common/constants'
 import { CommonEntity } from 'src/common/entities'
 import { Training } from 'src/training/training.entity'
 import { User } from 'src/user/user.entity'
@@ -21,7 +21,7 @@ export class Gym extends CommonEntity {
 
   @ManyToMany(() => User, { onDelete: 'SET NULL' })
   @JoinTable({
-    name: 'trainer_gym',
+    name: TRAINER_GYM_TABLE,
     joinColumn: { name: 'gymId', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'trainerId', referencedColumnName: 'id' },
   })

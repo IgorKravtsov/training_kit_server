@@ -30,7 +30,7 @@ export class AbonementController {
   @Post('create')
   @UseGuards(TrainerGuard)
   async create(@Body() body: CreateAbonementDto): Promise<AbonementDto> {
-    const { creator: userId, gym: gymId, ...data } = body
+    const { creatorId: userId, gymId: gymId, ...data } = body
 
     const creator = await this.userService.findOne({ id: userId as nowId })
     if (!creator) {

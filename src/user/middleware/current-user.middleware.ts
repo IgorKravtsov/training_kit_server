@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { Request, Response, NextFunction } from 'express'
-import { userInCookie } from 'src/common/constants'
+import { NextFunction, Request, Response } from 'express'
+import { USER_IN_COOKIE } from 'src/common/constants'
 import { UserService } from 'src/user/user.service'
 import { User as UserEntity } from 'src/user/user.entity'
 
@@ -22,7 +22,7 @@ export class CurrentUserMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     try {
-      const jwt = req.cookies[userInCookie]
+      const jwt = req.cookies[USER_IN_COOKIE]
       const data = await this.jwtService.verifyAsync(jwt)
       if (data) {
         const user = await this.userService.findOne({ id: data.id })

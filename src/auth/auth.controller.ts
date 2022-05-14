@@ -12,14 +12,17 @@ import {
 import { JwtService } from '@nestjs/jwt'
 import { Request, Response } from 'express'
 import * as bcrypt from 'bcrypt'
-
-import { Serialize } from 'src/helpers/interceptors/serialize.interceptor'
 import { UserService } from 'src/user/user.service'
 import { LoginDto, RegisterDto } from './dtos'
 import {
+  ABONEMENT_TABLE,
+  CHARACTERISTIC_TABLE,
+  GYM_TABLE,
+  LEARNER_ABONEMENT_RELATION,
   ORGANIZATION_TABLE,
   SALT_NUMBER,
-  userInCookie,
+  TRAINERS_RELATION,
+  USER_IN_COOKIE,
 } from 'src/common/constants'
 import { AuthGuard } from '../user/guards/auth.guard'
 import { UserDto } from 'src/user/dtos'
@@ -73,27 +76,34 @@ export class AuthController {
       throw new BadRequestException('Invalid credentials')
     }
     const jwt_token = await this.jwtService.signAsync({ id: user.id }) // sign more data in future
-    response.cookie(userInCookie, jwt_token, { httpOnly: true })
+    response.cookie(USER_IN_COOKIE, jwt_token, { httpOnly: true })
 
     return transformUser(user)
   }
 
   @UseGuards(AuthGuard)
   @Get('user')
-  @Serialize(UserDto)
-  async user(@Req() request: Request) {
-    //По сути не нужный метод, но пусть будет :)
+  // @Serialize(UserDto)
+  async user(@Req() request: Request): Promise<UserDto> {
+    const user = await this.userService.findOne(
+      { id: request.currentUser.id },
+      [
+        TRAINERS_RELATION,
+        LEARNER_ABONEMENT_RELATION,
+        ABONEMENT_TABLE,
+        ORGANIZATION_TABLE,
+        CHARACTERISTIC_TABLE,
+        GYM_TABLE,
+      ],
+    )
 
-    // const cookie = request.cookies[userInCookie]
-    // const verifiedData = await this.jwtService.verifyAsync(cookie)
-    // return this.userService.findOne({ id: verifiedData.id })
-    return request.currentUser
+    return transformUser(user)
   }
 
   @UseGuards(AuthGuard)
   @Post('logout')
   async logout(@Res({ passthrough: true }) response: Response) {
-    response.clearCookie(userInCookie)
+    response.clearCookie(USER_IN_COOKIE)
 
     return {
       message: 'Logged out successfully',

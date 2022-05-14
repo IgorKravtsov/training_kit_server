@@ -11,7 +11,7 @@ import { CharacteristicService } from 'src/characteristic/characteristic.service
 import { CreateCharDto } from 'src/characteristic/dtos'
 import { CharacteristicType } from 'src/characteristic/enums'
 import { SALT_NUMBER } from 'src/common/constants'
-import { nowId } from 'src/common/types'
+import { Id, nowId } from 'src/common/types'
 import { CreateGymDto } from 'src/gym/dtos'
 import { GymService } from 'src/gym/gym.service'
 import { CreateOrganizationDto } from 'src/organization/dtos'
@@ -22,6 +22,7 @@ import { UserRoles } from 'src/user/enums'
 import { UserService } from 'src/user/user.service'
 import { AssignAbonementDto } from '../abonement/dtos'
 import { LearnerAbonementService } from '../abonement/learner-abonement.service'
+import { arrDiff } from '../utils'
 
 @Controller('seed')
 export class SeedController {
@@ -56,7 +57,7 @@ export class SeedController {
       {
         title: 'Ден-Макс (Покровск)',
         address: 'ул. Пушкина, 12',
-        trainers: [2, 3],
+        trainers: [1, 2],
       },
       {
         title: 'Сокол (Кропивницкий)',
@@ -66,7 +67,7 @@ export class SeedController {
       {
         title: 'Сокол-2 (Кропивницкий)',
         address: 'ул. Соколова, 15А',
-        trainers: [2, 3],
+        trainers: [2],
       },
     ]
 
@@ -93,12 +94,12 @@ export class SeedController {
   async seedUsers() {
     const seedUsers = [
       {
-        name: 'learner',
-        lastName: 'learner',
-        email: 'l@l.com',
+        name: 'admin',
+        lastName: 'admin',
+        email: 'a@a.com',
         password: '123',
         organizations: [1],
-        role: UserRoles.LEARNER,
+        role: UserRoles.ADMIN,
       },
       {
         name: 'trainer',
@@ -107,29 +108,77 @@ export class SeedController {
         password: '123',
         organizations: [1],
         role: UserRoles.TRAINER,
+        trainers: [1],
       },
       {
-        name: 'admin',
-        lastName: 'admin',
-        email: 'a@a.com',
+        name: 'learner',
+        lastName: 'learner',
+        email: 'l@l.com',
         password: '123',
         organizations: [1],
-        role: UserRoles.ADMIN,
+        role: UserRoles.LEARNER,
+        trainers: [2],
       },
     ]
 
     for (const u of seedUsers) {
-      const { password, organizations: organizationIds, ...data } = u
+      const {
+        password,
+        organizations: organizationIds,
+        trainers: trainerIds,
+        ...data
+      } = u
       const hashedPass = await bcrypt.hash(password, SALT_NUMBER)
+
+      const { isRangeCorrect, entities: organizations } =
+        await this.organizationService.findInRangeId(organizationIds)
+      if (!isRangeCorrect) {
+        throw new BadRequestException(
+          '[seedUsers] Заданы неверные id организаций',
+        )
+      }
+
       const newUser = await this.userService.create({
         ...data,
         password: hashedPass,
-        organizations: organizationIds.map((id) => ({ id })),
+        organizations,
       })
       await this.userService.create(newUser)
+      trainerIds && (await this.assignToTrainers(trainerIds, newUser.id))
     }
 
     return 'Users seeded successfully'
+  }
+
+  async assignToTrainers(trainerIds: Id[], learnerId: Id) {
+    const { isRangeCorrect, entities: trainers } =
+      await this.userService.findInRangeId(trainerIds, {}, [
+        UserRoles.TRAINER,
+        UserRoles.ADMIN,
+      ])
+
+    if (!isRangeCorrect) {
+      throw new BadRequestException(
+        '[assignToTrainers] Заданы не верные id тренеров',
+      )
+    }
+    const learner = await this.userService.findOne({ id: learnerId as nowId })
+    if (!learner) {
+      throw new BadRequestException(
+        `[assignToTrainers] Не найден ученик с id: ${learnerId}`,
+      )
+    }
+    const learnerTrainers = learner.trainers
+
+    learnerTrainers &&
+      learnerTrainers.push(...arrDiff(learnerTrainers, trainers))
+
+    await this.userService.create({
+      ...learner,
+      trainers: learnerTrainers || trainers,
+    })
+
+    return `Successfully assigned learner: ${learnerId} to trainers: ${trainerIds}`
   }
 
   @Post('characteristics')
@@ -178,7 +227,7 @@ export class SeedController {
         trainingDate: new Date('2021-03-15 15:00:00'),
         trainingTime: new Date('2021-03-15 15:00:00'),
         gymId: 1,
-        trainers: [2, 3],
+        trainers: [1, 2],
       },
       {
         title: 'Кумите (младшая группа)',
@@ -194,7 +243,7 @@ export class SeedController {
         trainingDate: new Date('2021-03-15 15:00:00'),
         trainingTime: new Date('2021-03-15 15:00:00'),
         gymId: 1,
-        trainers: [3],
+        trainers: [1, 2],
       },
     ]
 
@@ -238,29 +287,29 @@ export class SeedController {
         price: 100,
         amountDays: 20,
         amountTrainings: 20,
-        creator: 2,
-        gym: 1,
+        creatorId: 2,
+        gymId: 1,
       },
       {
         title: 'Недельный стандарт (Покровск)',
         price: 40,
         amountDays: 7,
         amountTrainings: 3,
-        creator: 3,
-        gym: 1,
+        creatorId: 3,
+        gymId: 1,
       },
       {
         title: 'Месячный премиум (Кропивницкий)',
         price: 150,
         amountDays: 30,
         // amountTrainings: 0,
-        creator: 2,
-        gym: 2,
+        creatorId: 2,
+        gymId: 2,
       },
     ]
 
     for (const a of seedAbonements) {
-      const { creator: creatorId, gym: gymId, ...data } = a
+      const { creatorId, gymId, ...data } = a
 
       const gym = await this.gymService.findOne({ id: gymId as nowId })
       if (!gym) {
@@ -292,6 +341,14 @@ export class SeedController {
       {
         learner: 1,
         abonement: 1,
+      },
+      {
+        learner: 1,
+        abonement: 2,
+      },
+      {
+        learner: 3,
+        abonement: 3,
       },
     ]
 

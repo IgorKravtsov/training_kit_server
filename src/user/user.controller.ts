@@ -11,7 +11,7 @@ import { Id, nowId } from 'src/common/types'
 import { transformUser } from 'src/utils/transform'
 import { arrDiff } from 'src/utils'
 import { ORGANIZATION_TABLE, TRAINERS_RELATION } from 'src/common/constants'
-import { UpdateUserDto } from './dtos'
+import { UpdateUserDto, UserDto } from './dtos'
 import { UserService } from './user.service'
 import { AssignToTrainerDto } from './dtos/assign-to-trainer.dto'
 import { UserRoles } from './enums'
@@ -32,7 +32,7 @@ export class UserController {
   }
 
   @Post('assign-to-trainer')
-  async assignToTrainer(@Body() body: AssignToTrainerDto) {
+  async assignToTrainer(@Body() body: AssignToTrainerDto): Promise<UserDto> {
     const { trainers: trainerIds, learner: learnerId } = body
     const { isRangeCorrect, entities: trainers } =
       await this.userService.findInRangeId(trainerIds, {}, [

@@ -10,8 +10,8 @@ export const transformLearnerAbonement = (
   const { id, learner, abonement, daysLeft, trainingsLeft } = la
   return {
     id,
-    learner: transformPublicUser(learner),
-    abonement: transformAbonementOnly(abonement),
+    learner: learner && transformPublicUser(learner),
+    abonement: abonement && transformAbonementOnly(abonement),
     trainingsLeft,
     daysLeft,
   }
