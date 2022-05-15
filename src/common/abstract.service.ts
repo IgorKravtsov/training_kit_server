@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import {
   DeepPartial,
-  DeleteResult,
   FindOptionsOrder,
   FindOptionsWhere,
   In,
@@ -22,11 +21,13 @@ export abstract class AbstractService<Entity extends { id: Id }> {
 
   async findMany(
     condition: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
+    relations: string[] = [],
     orderBy?: FindOptionsOrder<Entity>,
   ): Promise<Entity[]> {
     return await this.repository.find({
       where: condition,
       order: orderBy,
+      relations,
     })
   }
 
@@ -34,7 +35,7 @@ export abstract class AbstractService<Entity extends { id: Id }> {
     ids: Id[],
     orderBy?: FindOptionsOrder<Entity>,
   ): Promise<{ entities: Entity[]; isRangeCorrect: boolean }> {
-    const entities = await this.findMany({ id: In(ids) as any }, orderBy)
+    const entities = await this.findMany({ id: In(ids) as any }, [], orderBy)
     return {
       entities,
       isRangeCorrect: entities.length === ids.length,

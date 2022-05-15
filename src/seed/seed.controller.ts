@@ -224,18 +224,20 @@ export class SeedController {
       {
         title: 'Ката (старшая группа)',
         description: 'Ката. Много ката',
-        trainingDate: new Date('2021-03-15 15:00:00'),
+        trainingDate: new Date('2022-03-15 15:00:00'),
         trainingTime: new Date('2021-03-15 15:00:00'),
         gymId: 1,
         trainers: [1, 2],
+        learners: [3],
       },
       {
         title: 'Кумите (младшая группа)',
         description: 'Кумите. Не забудьте защиту на руки и ноги',
-        trainingDate: new Date('2021-03-15 15:00:00'),
+        trainingDate: new Date('2020-03-15 15:00:00'),
         trainingTime: new Date('2021-03-15 15:00:00'),
         gymId: 1,
         trainers: [2],
+        learners: [3],
       },
       {
         title: 'Кумите (средняя группа)',
@@ -244,11 +246,12 @@ export class SeedController {
         trainingTime: new Date('2021-03-15 15:00:00'),
         gymId: 1,
         trainers: [1, 2],
+        learners: [3],
       },
     ]
 
     for (const t of seedTrainings) {
-      const { gymId, trainers: trainerIds, ...data } = t
+      const { gymId, trainers: trainerIds, learners: learnerIds, ...data } = t
 
       const gym = await this.gymService.findOne({ id: gymId as nowId })
       if (!gym) {
@@ -273,10 +276,44 @@ export class SeedController {
         gym,
         trainers,
       })
-      await this.trainingService.create(newTraining)
+      // await this.trainingService.create(newTraining)
+      learnerIds &&
+        (await this.markVisitingTraining(learnerIds, newTraining.id))
     }
 
     return 'Trainings seeded successfully'
+  }
+
+  async markVisitingTraining(learnerIds: Id[], trainingId: Id) {
+    const { isRangeCorrect, entities: learners } =
+      await this.userService.findInRangeId(learnerIds)
+
+    if (!isRangeCorrect) {
+      throw new BadRequestException(
+        '[markVisitingTraining] Заданы не верные id учеников',
+      )
+    }
+
+    const training = await this.trainingService.findOne({
+      id: trainingId as nowId,
+    })
+    if (!training) {
+      throw new NotFoundException(
+        `[markVisitingTraining] Тренеровка с id ${trainingId} не найдена`,
+      )
+    }
+
+    const trainingLearners = training.learners
+
+    trainingLearners &&
+      trainingLearners.push(...arrDiff(trainingLearners, learners))
+
+    await this.trainingService.create({
+      ...training,
+      learners,
+    })
+
+    return 'Learners marked to trainings successfully'
   }
 
   @Post('abonements')

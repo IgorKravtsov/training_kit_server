@@ -30,4 +30,9 @@ export class CreateTrainingDto {
   @ArrayMinSize(1)
   @IsNumber({}, { each: true })
   trainers: Id[]
+
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @IsOptional()
+  learners?: Id[]
 }

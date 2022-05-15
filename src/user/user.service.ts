@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { AbstractService } from 'src/common/abstract.service'
-import { CHARACTERISTIC_TABLE, ORGANIZATION_TABLE } from 'src/common/constants'
+import { ORGANIZATION_TABLE } from 'src/common/constants'
 import { PaginatedResult } from 'src/common/interfaces'
 import { Id } from 'src/common/types'
-import { FindOptionsOrder, FindOptionsWhere, In, Repository } from 'typeorm'
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
+import { FindOptionsOrder, In, Repository } from 'typeorm'
 import { UpdateUserDto } from './dtos/update-user.dto'
 import { UserRoles } from './enums'
 import { User } from './user.entity'
@@ -46,10 +45,10 @@ export class UserService extends AbstractService<User> {
   async findInRangeId(
     ids: Id[],
     orderBy?: FindOptionsOrder<User>,
-    roles?: UserRoles[],
+    roles: UserRoles[] = [],
   ): Promise<{ entities: User[]; isRangeCorrect: boolean }> {
     const entities = await this.repository.find({
-      where: { id: In(ids), role: In(roles) },
+      where: { id: In(ids), role: roles.length > 0 ? In(roles) : undefined },
       order: orderBy,
     })
     return {

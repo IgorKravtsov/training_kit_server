@@ -1,7 +1,7 @@
 import { Expose, Transform } from 'class-transformer'
 import { Id } from 'src/common/types'
 import { GymDto } from 'src/gym/dtos'
-import { PublicUserDto, UserDto } from 'src/user/dtos'
+import { PublicUserDto } from 'src/user/dtos'
 
 export class TrainingDto {
   @Expose()
@@ -21,8 +21,11 @@ export class TrainingDto {
 
   @Transform(({ obj }) => ({ title: obj.title, address: obj.address }))
   @Expose()
-  gym: GymDto
+  gym?: GymDto
 
   @Expose()
   trainers: PublicUserDto[]
+
+  @Expose()
+  learners: PublicUserDto[]
 }
