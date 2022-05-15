@@ -13,7 +13,7 @@ import { Id } from './types'
 
 @Injectable()
 export abstract class AbstractService<Entity extends { id: Id }> {
-  constructor(protected readonly repository: Repository<Entity>) {}
+  protected constructor(protected readonly repository: Repository<Entity>) {}
 
   async all(relations: string[] = []): Promise<Entity[]> {
     return await this.repository.find({ relations })

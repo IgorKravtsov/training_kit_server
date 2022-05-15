@@ -18,6 +18,7 @@ import { TrainingService } from './training.service'
 import {
   GetLearnerTrainingHistoryResponse,
   GetLernerTrainingHistoryRequest,
+  GetUserTrainingsRequest,
 } from './types'
 import {
   GYM_RELATION,
@@ -61,9 +62,11 @@ export class TrainingController {
       throw new NotFoundException(`Заданы неверные id тренера(-ов)`)
     }
 
-    const { entities: learners, isRangeCorrect: isLearnersRangeCorrect } =
-      await this.userService.findInRangeId(learnerIds)
-    if (!isLearnersRangeCorrect) {
+    const learnersData = learnerIds
+      ? await this.userService.findInRangeId(learnerIds)
+      : undefined
+
+    if (learnerIds && !learnersData?.isRangeCorrect) {
       throw new NotFoundException(`Заданы неверные id учеников`)
     }
 
@@ -71,7 +74,7 @@ export class TrainingController {
       ...data,
       gym,
       trainers,
-      learners,
+      learners: learnersData?.entities,
     })
 
     return transformTraining(newTraining)
@@ -101,6 +104,37 @@ export class TrainingController {
     return {
       count: trainings.length,
       trainings: trainings.map((t) => transformTraining(t)),
+    }
+  }
+
+  @Post('get-user-trainings')
+  async getUserTrainings(@Body() body: GetUserTrainingsRequest) {
+    const { trainerIds, startDate, endDate } = body
+
+    const { isRangeCorrect } = await this.userService.findInRangeId(
+      trainerIds,
+      {},
+      [UserRoles.TRAINER, UserRoles.ADMIN],
+    )
+    if (!isRangeCorrect) {
+      throw new NotFoundException(`Заданы неверные id тренера(-ов)`)
+    }
+
+    const trainings = await this.trainingService.findMany(
+      {
+        // trainers: In(trainerIds.map((id) => ({ id }))),
+        trainingDate: Between(startDate, endDate),
+      },
+      [TRAINERS_RELATION, LEARNERS_RELATION, GYM_RELATION],
+    )
+    const gymTrainings = this.trainingService.convertGymTraining(
+      trainings,
+      trainerIds,
+    )
+
+    return {
+      totalCount: gymTrainings.length,
+      trainings: gymTrainings,
     }
   }
 }
