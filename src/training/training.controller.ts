@@ -25,6 +25,8 @@ import {
   LEARNERS_RELATION,
   TRAINERS_RELATION,
 } from 'src/common/constants'
+import { MarkVisitingTrainingRequest } from './types/mark-visiting-training.type'
+import { User } from '../user/user.entity'
 
 @Controller('training')
 export class TrainingController {
@@ -135,6 +137,56 @@ export class TrainingController {
     return {
       totalCount: gymTrainings.length,
       trainings: gymTrainings,
+    }
+  }
+
+  @Post('mark-visiting-training')
+  async markVisitingTraining(@Body() body: MarkVisitingTrainingRequest) {
+    const { trainingId, userId } = body
+
+    const training = await this.trainingService.findOne(
+      {
+        id: trainingId as nowId,
+      },
+      [LEARNERS_RELATION],
+    )
+    if (!training) {
+      throw new NotFoundException(`Не найдена тренеровка с id: ${trainingId}`)
+    }
+
+    const learner = await this.userService.findOne({ id: userId as nowId })
+    if (!learner) {
+      throw new NotFoundException(`Не найден пользователь с id: ${userId}`)
+    }
+
+    if (
+      training?.learners?.filter(
+        (trainingLearner) => trainingLearner.id === learner.id,
+      ).length > 0
+    ) {
+      return {
+        message: `Пользователь с id: ${userId} уже записан на тренеровку ${trainingId}`,
+      }
+    }
+
+    let trainingLearners: User[] = []
+
+    if (training.learners) {
+      trainingLearners = training.learners
+      trainingLearners.push(learner)
+    } else {
+      trainingLearners = [learner]
+    }
+
+    // trainingLearners && trainingLearners.push(learner)
+
+    await this.trainingService.create({
+      ...training,
+      learners: trainingLearners,
+    })
+
+    return {
+      message: `Пользователь с id: ${userId} успешно записан на тренеровку ${trainingId}`,
     }
   }
 }

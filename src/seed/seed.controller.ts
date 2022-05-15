@@ -310,7 +310,7 @@ export class SeedController {
 
     await this.trainingService.create({
       ...training,
-      learners,
+      learners: trainingLearners,
     })
 
     return 'Learners marked to trainings successfully'
