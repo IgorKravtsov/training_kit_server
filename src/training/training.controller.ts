@@ -178,8 +178,6 @@ export class TrainingController {
       trainingLearners = [learner]
     }
 
-    // trainingLearners && trainingLearners.push(learner)
-
     await this.trainingService.create({
       ...training,
       learners: trainingLearners,
