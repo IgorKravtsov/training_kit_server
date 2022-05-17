@@ -29,9 +29,6 @@ export class TrainingService extends AbstractService<Training> {
         tmpTrainings.push(nowTraining)
       }
     }
-    for (const tmpTraining of tmpTrainings) {
-      tmpTrainings.forEach((tr) => console.log(tr.trainers))
-    }
 
     const res: GymTraining[] = []
 
