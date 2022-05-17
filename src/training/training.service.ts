@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { AbstractService } from 'src/common/abstract.service'
 import { Repository } from 'typeorm'
+import { AbstractService } from 'src/common/abstract.service'
+import { Id } from 'src/common/types'
+import { isArrContainsObj } from 'src/utils'
+import { transformGym, transformTraining } from 'src/utils/transform'
 import { Training } from './training.entity'
-import { Id } from '../common/types'
-import { isArrContainsObj } from '../utils'
-import { transformGym, transformTraining } from '../utils/transform'
 import { GymTraining } from './types'
 
 @Injectable()
