@@ -18,10 +18,10 @@ export class CreateTrainingDto {
   description?: string
 
   @IsDateString()
-  trainingDate: Date
+  trainingDateTime: Date
 
-  @IsDateString()
-  trainingTime: Date
+  // @IsDateString()
+  // trainingTime: Date
 
   @IsNotEmpty()
   gymId: Id

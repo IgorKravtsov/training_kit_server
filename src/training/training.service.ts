@@ -4,7 +4,7 @@ import { Repository } from 'typeorm'
 import { AbstractService } from 'src/common/abstract.service'
 import { Id } from 'src/common/types'
 import { isArrContainsObj } from 'src/utils'
-import { transformGym, transformTraining } from 'src/utils/transform'
+import { transformGym, transformTrainingCheckVisit } from 'src/utils/transform'
 import { Training } from './training.entity'
 import { GymTraining } from './types'
 
@@ -38,7 +38,7 @@ export class TrainingService extends AbstractService<Training> {
         const resTrainings = tmpTrainings.filter((t) => t.gym.id === nowGym.id)
         res.push({
           gym: transformGym(nowGym),
-          trainings: resTrainings.map((rt) => transformTraining(rt)),
+          trainings: resTrainings.map((rt) => transformTrainingCheckVisit(rt)),
         })
       }
     }

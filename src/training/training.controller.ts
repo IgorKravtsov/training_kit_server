@@ -93,12 +93,13 @@ export class TrainingController {
   ): Promise<GetLearnerTrainingHistoryResponse> {
     const { learnerId, days = -1 } = body
     const neededDate = new Date()
-    neededDate.setDate(new Date().getDate() - days)
+    neededDate.setDate(new Date().getDate() - days - 1)
 
     const trainings = await this.trainingService.findMany(
       {
         learners: [{ id: learnerId as nowId }],
-        trainingDate: days !== -1 ? Between(neededDate, new Date()) : undefined,
+        trainingDateTime:
+          days !== -1 ? Between(neededDate, new Date()) : undefined,
       },
       [TRAINERS_RELATION, LEARNERS_RELATION, GYM_RELATION],
     )
@@ -111,7 +112,20 @@ export class TrainingController {
 
   @Post('get-user-trainings')
   async getUserTrainings(@Body() body: GetUserTrainingsRequest) {
-    const { trainerIds, startDate, endDate } = body
+    const {
+      trainerIds,
+      startDate: clientStartDate,
+      endDate: clientEndDate,
+    } = body
+    const startDate = new Date(clientStartDate)
+    const endDate = new Date(clientEndDate)
+
+    if (startDate > endDate) {
+      throw new NotFoundException(`Задан неверный диапазон дат`)
+    }
+
+    startDate.setDate(startDate.getDate() - 1)
+    endDate.setDate(endDate.getDate() + 1)
 
     const { isRangeCorrect } = await this.userService.findInRangeId(
       trainerIds,
@@ -125,7 +139,7 @@ export class TrainingController {
     const trainings = await this.trainingService.findMany(
       {
         // trainers: In(trainerIds.map((id) => ({ id }))),
-        trainingDate: Between(startDate, endDate),
+        trainingDateTime: Between(startDate, endDate),
       },
       [TRAINERS_RELATION, LEARNERS_RELATION, GYM_RELATION],
     )
@@ -165,7 +179,7 @@ export class TrainingController {
       ).length > 0
     ) {
       return {
-        message: `Пользователь с id: ${userId} уже записан на тренеровку ${trainingId}`,
+        message: `Пользователь с id: ${userId} уже записан на тренеровку с id: ${trainingId}`,
       }
     }
 

@@ -13,10 +13,10 @@ export class Training extends CommonEntity {
   description: string
 
   @Column()
-  trainingDate: Date
+  trainingDateTime: Date
 
-  @Column()
-  trainingTime: Date
+  // @Column()
+  // trainingTime: Date
 
   @ManyToOne(() => Gym, (gym) => gym.trainings)
   gym: Gym

@@ -7,9 +7,11 @@ export class GetUserTrainingsRequest {
   @IsNumber({}, { each: true })
   trainerIds: Id[]
 
+  // @IsDate()
   @IsDateString()
   startDate: Date
 
+  // @IsDate()
   @IsDateString()
   endDate: Date
 }

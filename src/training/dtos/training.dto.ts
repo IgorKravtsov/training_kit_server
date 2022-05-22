@@ -14,10 +14,10 @@ export class TrainingDto {
   description: string
 
   @Expose()
-  trainingDate: Date
+  trainingDateTime: Date
 
-  @Expose()
-  trainingTime: Date
+  // @Expose()
+  // trainingTime: Date
 
   @Transform(({ obj }) => ({ title: obj.title, address: obj.address }))
   @Expose()
@@ -28,4 +28,7 @@ export class TrainingDto {
 
   @Expose()
   learners: PublicUserDto[]
+
+  @Expose()
+  canBeVisited?: boolean
 }

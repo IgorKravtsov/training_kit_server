@@ -224,8 +224,8 @@ export class SeedController {
       {
         title: 'Ката (старшая группа)',
         description: 'Ката. Много ката',
-        trainingDate: new Date('2022-03-15 15:00:00'),
-        trainingTime: new Date('2021-03-15 15:00:00'),
+        trainingDateTime: new Date('2022-03-15 15:00:00'),
+        // trainingTime: new Date('2021-03-15 15:00:00'),
         gymId: 1,
         trainers: [1, 2],
         learners: [3],
@@ -233,8 +233,8 @@ export class SeedController {
       {
         title: 'Кумите (младшая группа)',
         description: 'Кумите. Не забудьте защиту на руки и ноги',
-        trainingDate: new Date('2020-03-15 15:00:00'),
-        trainingTime: new Date('2021-03-15 15:00:00'),
+        trainingDateTime: new Date('2020-03-15 15:00:00'),
+        // trainingTime: new Date('2021-03-15 15:00:00'),
         gymId: 3,
         trainers: [2],
         learners: [3],
@@ -242,8 +242,8 @@ export class SeedController {
       {
         title: 'Кумите (средняя группа)',
         description: 'Кумите. Не забудьте защиту на руки и ноги',
-        trainingDate: new Date('2021-03-15 15:00:00'),
-        trainingTime: new Date('2021-03-15 15:00:00'),
+        trainingDateTime: new Date('2021-03-15 15:00:00'),
+        // trainingTime: new Date('2021-03-15 15:00:00'),
         gymId: 2,
         trainers: [1, 2],
         learners: [3],

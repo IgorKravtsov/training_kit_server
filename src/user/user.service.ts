@@ -30,7 +30,6 @@ export class UserService extends AbstractService<User> {
 
   async updateUser(id: Id, body: UpdateUserDto): Promise<User> {
     const { organizations, ...data } = body
-    console.log(id)
 
     await super.update(id, {
       ...data,

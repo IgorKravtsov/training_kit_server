@@ -6,7 +6,6 @@ import { transformAbonementOnly } from './abonement.transform'
 export const transformLearnerAbonement = (
   la: LearnerAbonement,
 ): LearnerAbonementDto => {
-  console.log(la)
   const { id, learner, abonement, daysLeft, trainingsLeft } = la
   return {
     id,

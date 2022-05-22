@@ -29,7 +29,7 @@ import { UserDto } from 'src/user/dtos'
 import { OrganizationService } from 'src/organization/organization.service'
 import { transformUser } from 'src/utils/transform'
 
-@Controller('auth')
+@Controller()
 export class AuthController {
   constructor(
     private userService: UserService,
@@ -37,7 +37,7 @@ export class AuthController {
     private organizationService: OrganizationService,
   ) {}
 
-  @Post('register')
+  @Post('auth/register')
   // @Serialize(UserDto)
   async register(@Body() body: RegisterDto): Promise<UserDto> {
     const { password, organizations: organizationIds, ...data } = body
@@ -59,7 +59,7 @@ export class AuthController {
     return transformUser(newUser)
   }
 
-  @Post('login')
+  @Post('auth/login')
   // @Serialize(UserDto)
   async login(
     @Body() body: LoginDto,
