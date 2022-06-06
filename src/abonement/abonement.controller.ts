@@ -2,6 +2,8 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
+  NotFoundException,
   Post,
   UseGuards,
 } from '@nestjs/common'
@@ -17,6 +19,8 @@ import { AbonementService } from './abonement.service'
 import { LearnerAbonementService } from './learner-abonement.service'
 import { AbonementDto, AssignAbonementDto, CreateAbonementDto } from './dtos'
 import { LearnerAbonementDto } from './dtos/learner-abonement.dto'
+import { GetLearnerAbonementsRequest } from './types/get-learner-abonements.type'
+import { ABONEMENT_RELATION, LEARNER_RELATION } from 'src/common/constants'
 
 @Controller('abonement')
 export class AbonementController {
@@ -26,6 +30,35 @@ export class AbonementController {
     private abonementService: AbonementService,
     private learnerAbonementService: LearnerAbonementService,
   ) {}
+
+  @Get('all')
+  async getAllLearnerAbonementsFromDB() {
+    return await this.learnerAbonementService.all([
+      LEARNER_RELATION,
+      ABONEMENT_RELATION,
+    ])
+  }
+
+  @Post('get-learner-abonements')
+  // @UseGuards(UseGuards)
+  async getLearnerAbonements(
+    @Body() body: GetLearnerAbonementsRequest,
+  ): Promise<LearnerAbonementDto[]> {
+    const { learnerId } = body
+
+    const learner = await this.userService.findOne({ id: learnerId as nowId })
+    if (!learner) {
+      throw new NotFoundException(`Не найден ученик с id: ${learnerId}`)
+    }
+
+    console.log(learner)
+
+    const learnerAbonements = await this.learnerAbonementService.findMany({
+      learner: { id: learnerId } as any,
+    })
+
+    return learnerAbonements.map((la) => transformLearnerAbonement(la))
+  }
 
   @Post('create')
   @UseGuards(TrainerGuard)

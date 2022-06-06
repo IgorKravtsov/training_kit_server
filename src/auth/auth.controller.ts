@@ -66,7 +66,14 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<UserDto> {
     const { email, password } = body
-    const user = await this.userService.findOne({ email }, [ORGANIZATION_TABLE])
+    const user = await this.userService.findOne({ email }, [
+      TRAINERS_RELATION,
+      LEARNER_ABONEMENT_RELATION,
+      ABONEMENT_TABLE,
+      ORGANIZATION_TABLE,
+      CHARACTERISTIC_TABLE,
+      GYM_TABLE,
+    ])
 
     if (!user) {
       throw new NotFoundException('User was not found')

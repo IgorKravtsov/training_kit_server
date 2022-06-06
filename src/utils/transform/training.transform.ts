@@ -3,6 +3,7 @@ import { Training } from 'src/training/training.entity'
 import { transformGym } from './gym.transform'
 import { transformPublicUser } from './user.transform'
 import { checkCanVisit } from '../check-can-visit.util'
+import { User } from '../../user/user.entity'
 
 export const transformTraining = (training: Training): TrainingDto => {
   const {
@@ -30,6 +31,7 @@ export const transformTraining = (training: Training): TrainingDto => {
 
 export const transformTrainingCheckVisit = (
   training: Training,
+  learner: User,
 ): TrainingDto => {
   const { id, title, description, trainers, gym, trainingDateTime, learners } =
     training
@@ -42,7 +44,7 @@ export const transformTrainingCheckVisit = (
     learners: learners && learners.map((l) => transformPublicUser(l)),
     gym: transformGym(gym),
     trainingDateTime,
-    canBeVisited: checkCanVisit(trainingDateTime),
+    canBeVisited: checkCanVisit(trainingDateTime, learner, training),
     // trainingTime,
   }
 }

@@ -7,6 +7,8 @@ import { isArrContainsObj } from 'src/utils'
 import { transformGym, transformTrainingCheckVisit } from 'src/utils/transform'
 import { Training } from './training.entity'
 import { GymTraining } from './types'
+import { User } from '../user/user.entity'
+import { TrainingDto } from './dtos'
 
 @Injectable()
 export class TrainingService extends AbstractService<Training> {
@@ -17,7 +19,22 @@ export class TrainingService extends AbstractService<Training> {
     super(trainingRepository)
   }
 
-  convertGymTraining(trainings: Training[], trainerIds: Id[]): GymTraining[] {
+  byDateTime = (t1: TrainingDto, t2: TrainingDto) => {
+    if (t1.trainingDateTime > t2.trainingDateTime) {
+      return 1
+    }
+    if (t1.trainingDateTime < t2.trainingDateTime) {
+      return -1
+    }
+    // a должно быть равным b
+    return 0
+  }
+
+  convertGymTraining(
+    trainings: Training[],
+    trainerIds: Id[],
+    learner?: User,
+  ): GymTraining[] {
     const tmpTrainings: Training[] = []
     for (let i = 0; i < trainings.length; i++) {
       const nowTraining = trainings[i]
@@ -38,7 +55,9 @@ export class TrainingService extends AbstractService<Training> {
         const resTrainings = tmpTrainings.filter((t) => t.gym.id === nowGym.id)
         res.push({
           gym: transformGym(nowGym),
-          trainings: resTrainings.map((rt) => transformTrainingCheckVisit(rt)),
+          trainings: resTrainings
+            .map((rt) => transformTrainingCheckVisit(rt, learner))
+            .sort(this.byDateTime),
         })
       }
     }

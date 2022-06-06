@@ -2,6 +2,7 @@ import { Expose, Transform } from 'class-transformer'
 import { Id } from 'src/common/types'
 import { GymDto } from 'src/gym/dtos'
 import { PublicUserDto } from 'src/user/dtos'
+import { CannotVisitTraining } from '../types/cannot-visit-training.interface'
 
 export class TrainingDto {
   @Expose()
@@ -30,5 +31,5 @@ export class TrainingDto {
   learners: PublicUserDto[]
 
   @Expose()
-  canBeVisited?: boolean
+  canBeVisited?: boolean | CannotVisitTraining
 }

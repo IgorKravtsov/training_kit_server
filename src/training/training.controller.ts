@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -112,40 +113,30 @@ export class TrainingController {
 
   @Post('get-user-trainings')
   async getUserTrainings(@Body() body: GetUserTrainingsRequest) {
-    const {
-      trainerIds,
-      startDate: clientStartDate,
-      endDate: clientEndDate,
-    } = body
-    const startDate = new Date(clientStartDate)
-    const endDate = new Date(clientEndDate)
+    const { learnerId, startDate, endDate } = body
 
     if (startDate > endDate) {
-      throw new NotFoundException(`Задан неверный диапазон дат`)
+      throw new BadRequestException(`Задан неверный диапазон дат`)
     }
 
-    startDate.setDate(startDate.getDate() - 1)
-    endDate.setDate(endDate.getDate() + 1)
-
-    const { isRangeCorrect } = await this.userService.findInRangeId(
-      trainerIds,
-      {},
-      [UserRoles.TRAINER, UserRoles.ADMIN],
-    )
-    if (!isRangeCorrect) {
-      throw new NotFoundException(`Заданы неверные id тренера(-ов)`)
+    const learner = await this.userService.findOne({ id: learnerId as nowId }, [
+      TRAINERS_RELATION,
+    ])
+    if (!learner) {
+      throw new NotFoundException(`Ученик с id: ${learnerId} не найден`)
     }
 
     const trainings = await this.trainingService.findMany(
       {
-        // trainers: In(trainerIds.map((id) => ({ id }))),
         trainingDateTime: Between(startDate, endDate),
       },
       [TRAINERS_RELATION, LEARNERS_RELATION, GYM_RELATION],
     )
+
     const gymTrainings = this.trainingService.convertGymTraining(
       trainings,
-      trainerIds,
+      learner.trainers.map((t) => t.id),
+      learner,
     )
 
     return {
@@ -153,6 +144,50 @@ export class TrainingController {
       trainings: gymTrainings,
     }
   }
+
+  // @Post('get-user-trainings')
+  // async getUserTrainings(@Body() body: GetUserTrainingsRequest) {
+  //   const {
+  //     trainerIds,
+  //     startDate: clientStartDate,
+  //     endDate: clientEndDate,
+  //   } = body
+  //   const startDate = new Date(clientStartDate)
+  //   const endDate = new Date(clientEndDate)
+  //
+  //   if (startDate > endDate) {
+  //     throw new NotFoundException(`Задан неверный диапазон дат`)
+  //   }
+  //
+  //   startDate.setDate(startDate.getDate() - 1)
+  //   endDate.setDate(endDate.getDate() + 1)
+  //
+  //   const { isRangeCorrect } = await this.userService.findInRangeId(
+  //     trainerIds,
+  //     {},
+  //     [UserRoles.TRAINER, UserRoles.ADMIN],
+  //   )
+  //   if (!isRangeCorrect) {
+  //     throw new NotFoundException(`Заданы неверные id тренера(-ов)`)
+  //   }
+  //
+  //   const trainings = await this.trainingService.findMany(
+  //     {
+  //       // trainers: In(trainerIds.map((id) => ({ id }))),
+  //       trainingDateTime: Between(startDate, endDate),
+  //     },
+  //     [TRAINERS_RELATION, LEARNERS_RELATION, GYM_RELATION],
+  //   )
+  //   const gymTrainings = this.trainingService.convertGymTraining(
+  //     trainings,
+  //     trainerIds,
+  //   )
+  //
+  //   return {
+  //     totalCount: gymTrainings.length,
+  //     trainings: gymTrainings,
+  //   }
+  // }
 
   @Post('mark-visiting-training')
   async markVisitingTraining(@Body() body: MarkVisitingTrainingRequest) {

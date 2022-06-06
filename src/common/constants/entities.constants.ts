@@ -12,3 +12,6 @@ export const LEARNERS_RELATION = 'learners'
 export const LEARNER_ABONEMENT_RELATION = 'learnerAbonements'
 export const GYMS_RELATION = 'gyms'
 export const GYM_RELATION = 'gym'
+
+export const LEARNER_RELATION = 'learner'
+export const ABONEMENT_RELATION = 'abonement'
