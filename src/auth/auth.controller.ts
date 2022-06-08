@@ -40,7 +40,15 @@ export class AuthController {
   @Post('auth/register')
   // @Serialize(UserDto)
   async register(@Body() body: RegisterDto): Promise<UserDto> {
-    const { password, organizations: organizationIds, ...data } = body
+    const { email, password, organizations: organizationIds, ...data } = body
+
+    const user = await this.userService.findOne({ email })
+
+    if (user) {
+      throw new BadRequestException(
+        `Пользователь с email "${email} уже существует"`,
+      )
+    }
 
     const { entities: organizations, isRangeCorrect: isRangePass } =
       await this.organizationService.findInRangeId(organizationIds)
@@ -52,6 +60,7 @@ export class AuthController {
 
     const newUser = await this.userService.create({
       ...data,
+      email,
       password: hashedPass,
       organizations,
     })
@@ -108,12 +117,12 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard)
-  @Post('logout')
+  @Post('auth/logout')
   async logout(@Res({ passthrough: true }) response: Response) {
     response.clearCookie(USER_IN_COOKIE)
 
     return {
-      message: 'Logged out successfully',
+      message: 'Выход выполнен успешно',
     }
   }
 }
