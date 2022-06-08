@@ -60,6 +60,16 @@ export class CharacteristicController {
     @Body() body: GetCharacteristicByIdRequest,
   ): Promise<GetCharacteristicByIdResponse> {
     const { characteristicId, userId } = body
+
+    const initCharacteristic = await this.characteristicService.findOne({
+      id: characteristicId as nowId,
+    })
+    if (!initCharacteristic) {
+      throw new BadRequestException(
+        `Характеристики с id: ${characteristicId} не найдено`,
+      )
+    }
+
     const user = await this.userService.findOne({ id: userId as nowId }, [
       CHARACTERISTIC_TABLE,
     ])
