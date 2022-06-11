@@ -103,6 +103,7 @@ export class TrainingController {
           days !== -1 ? Between(neededDate, new Date()) : undefined,
       },
       [TRAINERS_RELATION, LEARNERS_RELATION, GYM_RELATION],
+      { trainingDateTime: 'DESC' },
     )
 
     return {

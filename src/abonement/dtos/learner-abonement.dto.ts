@@ -18,4 +18,10 @@ export class LearnerAbonementDto {
 
   @Expose()
   abonement: AbonementDto
+
+  @Expose()
+  endDate: Date
+
+  @Expose()
+  startDate: Date
 }

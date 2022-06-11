@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { AbstractService } from 'src/common/abstract.service'
 import { Abonement } from './abonement.entity'
+import { Id } from 'src/common/types'
 
 @Injectable()
 export class AbonementService extends AbstractService<Abonement> {
@@ -10,5 +11,14 @@ export class AbonementService extends AbstractService<Abonement> {
     @InjectRepository(Abonement) abonementRepository: Repository<Abonement>,
   ) {
     super(abonementRepository)
+  }
+
+  async getTrainerAbonements(trainerIds: Id[]): Promise<Abonement[]> {
+    const abonements: Abonement[][] = []
+    for (const id of trainerIds) {
+      const abonement = await this.findMany({ creator: { id } as any })
+      abonements.push(abonement)
+    }
+    return abonements.flat()
   }
 }

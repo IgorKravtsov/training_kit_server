@@ -8,12 +8,24 @@ import {
   Put,
 } from '@nestjs/common'
 import { Id, nowId } from 'src/common/types'
-import { transformUser } from 'src/utils/transform'
+import { transformPublicUser, transformUser } from 'src/utils/transform'
 import { arrDiff } from 'src/utils'
-import { ORGANIZATION_TABLE, TRAINERS_RELATION } from 'src/common/constants'
-import { UpdateUserDto, UserDto } from './dtos'
+import {
+  ABONEMENT_TABLE,
+  CHARACTERISTIC_TABLE,
+  GYM_TABLE,
+  LEARNER_ABONEMENT_RELATION,
+  ORGANIZATION_TABLE,
+  TRAINERS_RELATION,
+} from 'src/common/constants'
+import {
+  AssignToTrainersDto,
+  GetTrainersToAssignDto,
+  PublicUserDto,
+  UpdateUserDto,
+  UserDto,
+} from './dtos'
 import { UserService } from './user.service'
-import { AssignToTrainerDto } from './dtos/assign-to-trainer.dto'
 import { UserRoles } from './enums'
 
 @Controller('user')
@@ -31,8 +43,8 @@ export class UserController {
     return await this.userService.delete(userId)
   }
 
-  @Post('assign-to-trainer')
-  async assignToTrainer(@Body() body: AssignToTrainerDto): Promise<UserDto> {
+  @Post('assign-to-trainers')
+  async assignToTrainers(@Body() body: AssignToTrainersDto): Promise<UserDto> {
     const { trainers: trainerIds, learner: learnerId } = body
     const { isRangeCorrect, entities: trainers } =
       await this.userService.findInRangeId(trainerIds, {}, [
@@ -61,8 +73,25 @@ export class UserController {
       {
         id: learnerId as nowId,
       },
-      [ORGANIZATION_TABLE, TRAINERS_RELATION],
+      [
+        TRAINERS_RELATION,
+        LEARNER_ABONEMENT_RELATION,
+        ABONEMENT_TABLE,
+        ORGANIZATION_TABLE,
+        CHARACTERISTIC_TABLE,
+        GYM_TABLE,
+      ],
     )
     return transformUser(updatedLearner)
+  }
+
+  @Post('get-trainers-to-assign')
+  async getTrainersToAssign(
+    @Body() body: GetTrainersToAssignDto,
+  ): Promise<PublicUserDto[]> {
+    const { trainer } = body
+    const trainers = await this.userService.findByNameLastNameOrEmail(trainer)
+
+    return trainers.map(transformPublicUser)
   }
 }

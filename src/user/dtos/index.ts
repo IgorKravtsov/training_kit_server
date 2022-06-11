@@ -1,3 +1,5 @@
 export * from './user.dto'
 export * from './public-user.dto'
 export * from './update-user.dto'
+export * from './assign-to-trainers.dto'
+export * from './get-trainer-to-assign.dto'

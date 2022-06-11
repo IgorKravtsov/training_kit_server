@@ -16,7 +16,6 @@ import { CreateGymDto, GymDto } from './dtos'
 import { GymService } from './gym.service'
 import {
   GetLearnerGymsRequest,
-  GetLearnerGymsResponse,
   GetTrainerGymsRequest,
   GetTrainerGymsResponse,
 } from './types'
@@ -83,9 +82,7 @@ export class GymController {
   }
 
   @Post('learner-gyms')
-  async getLearnerGyms(
-    @Body() body: GetLearnerGymsRequest,
-  ): Promise<GetLearnerGymsResponse> {
+  async getLearnerGyms(@Body() body: GetLearnerGymsRequest): Promise<GymDto[]> {
     const gyms = await this.gymService.findMany({
       trainers: body.trainers.map((id) => ({ id })) as any,
     })
@@ -96,8 +93,6 @@ export class GymController {
       )
     }
 
-    return {
-      gyms: gyms.map((gym) => transformGym(gym)),
-    }
+    return gyms.map(transformGym)
   }
 }

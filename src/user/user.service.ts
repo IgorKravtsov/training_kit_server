@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { AbstractService } from 'src/common/abstract.service'
-import { ORGANIZATION_TABLE } from 'src/common/constants'
+import { ORGANIZATION_TABLE, USER_TABLE } from 'src/common/constants'
 import { PaginatedResult } from 'src/common/interfaces'
 import { Id } from 'src/common/types'
-import { FindOptionsOrder, In, Repository } from 'typeorm'
+import { FindOptionsOrder, In, Like, Repository } from 'typeorm'
 import { UpdateUserDto } from './dtos/update-user.dto'
 import { UserRoles } from './enums'
 import { User } from './user.entity'
@@ -54,5 +54,19 @@ export class UserService extends AbstractService<User> {
       entities,
       isRangeCorrect: entities.length >= ids.length,
     }
+  }
+
+  async findByNameLastNameOrEmail(search: string): Promise<User[]> {
+    return await this.repository
+      .createQueryBuilder(USER_TABLE)
+      .where(
+        'role=:trainer OR role=:admin AND (name LIKE :search OR lastName LIKE :search OR email LIKE :search)',
+        {
+          search: `%${search}%`,
+          trainer: UserRoles.TRAINER,
+          admin: UserRoles.ADMIN,
+        },
+      )
+      .getMany()
   }
 }
