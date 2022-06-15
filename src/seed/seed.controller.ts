@@ -60,14 +60,14 @@ export class SeedController {
         trainers: [1, 2],
       },
       {
-        title: 'Сокол (Кропивницкий)',
+        title: 'Ураган (Селидово)',
         address: 'ул. Соколова, 15',
         trainers: [2],
       },
       {
-        title: 'Сокол-2 (Кропивницкий)',
+        title: 'Краматорская филия',
         address: 'ул. Соколова, 15А',
-        trainers: [2],
+        trainers: [4],
       },
     ]
 
@@ -118,6 +118,15 @@ export class SeedController {
         organizations: [1],
         role: UserRoles.LEARNER,
         trainers: [2],
+      },
+      {
+        name: 'trainer1',
+        lastName: 'trainer1',
+        email: 't1@t.com',
+        password: '123',
+        organizations: [1],
+        role: UserRoles.TRAINER,
+        trainers: [1],
       },
     ]
 
@@ -325,7 +334,7 @@ export class SeedController {
         amountDays: 20,
         amountTrainings: 20,
         creatorId: 2,
-        gymId: 1,
+        gymIds: [1],
       },
       {
         title: 'Недельный стандарт (Покровск)',
@@ -333,40 +342,41 @@ export class SeedController {
         amountDays: 7,
         amountTrainings: 3,
         creatorId: 3,
-        gymId: 1,
+        gymIds: [1],
       },
       {
-        title: 'Месячный премиум (Кропивницкий)',
+        title: 'Месячный премиум (Селидово)',
         price: 150,
         amountDays: 30,
         // amountTrainings: 0,
         creatorId: 2,
-        gymId: 2,
+        gymIds: [2],
       },
     ]
 
     for (const a of seedAbonements) {
-      const { creatorId, gymId, ...data } = a
-
-      const gym = await this.gymService.findOne({ id: gymId as nowId })
-      if (!gym) {
-        throw new NotFoundException(
-          `[seedAbonements] Не найден зал с id: '${gymId}'`,
-        )
-      }
+      const { creatorId, gymIds, ...data } = a
 
       const creator = await this.userService.findOne({ id: creatorId as nowId })
-      if (!gym) {
+      if (!creator) {
         throw new NotFoundException(
           `[seedAbonements] Не найден зал с id: '${creatorId}'`,
         )
       }
 
-      await this.abonementService.create({
-        ...data,
-        gym,
-        creator,
-      })
+      const { entities: gyms, isRangeCorrect } =
+        await this.gymService.findInRangeId(gymIds)
+      if (!isRangeCorrect) {
+        throw new BadRequestException(`Не верно заданы id залов: ${gymIds}`)
+      }
+
+      for (let i = 0; i < gyms.length; i++) {
+        await this.abonementService.create({
+          ...data,
+          creator,
+          gym: { id: gyms[i].id },
+        })
+      }
     }
 
     return 'Abonements seeded successfully'

@@ -19,6 +19,6 @@ export class CreateAbonementDto {
   @IsNumber()
   creatorId: Id
 
-  @IsNumber()
-  gymId: Id
+  @IsNumber({}, { each: true })
+  gymIds: Id[]
 }

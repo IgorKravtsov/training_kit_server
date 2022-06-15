@@ -23,8 +23,13 @@ import {
   CreateAbonementDto,
   LearnerAbonementDto,
 } from './dtos'
-import { ABONEMENT_RELATION, LEARNER_RELATION } from 'src/common/constants'
 import {
+  ABONEMENT_RELATION,
+  CREATOR_RELATION,
+  LEARNER_RELATION,
+} from 'src/common/constants'
+import {
+  GetGymAbonementsRequest,
   GetLearnerAbonementsRequest,
   GetOneLearnerAbonementRequest,
   GetTrainersAbonementsRequest,
@@ -126,53 +131,68 @@ export class AbonementController {
     const abonements = await this.abonementService.getTrainerAbonements(
       trainers,
     )
-    // const learner = await this.userService.findOne({ id: learnerId as nowId })
-    // if (!learner) {
-    //   throw new BadRequestException(`Не найден ученик с id: ${learnerId}`)
-    // }
 
-    // const abonement = await this.abonementService.findOne({
-    //   id: abonementId as nowId,
-    // })
-    // if (!abonement) {
-    //   throw new BadRequestException(`Не найден абонемент с id: ${abonementId}`)
-    // }
+    return abonements.map(transformAbonement)
+  }
 
-    // const learnerAbonement = await this.learnerAbonementService.findOne({
-    //   abonement: { id: abonementId as nowId },
-    //   learner: { id: learnerId as nowId },
-    // })
-    // if (!learnerAbonement) {
-    //   throw new NotFoundException(
-    //     `Не найден абонемент с id: ${abonementId} для ученика с id: ${learnerId}`,
-    //   )
-    // }
+  @Post('get-gym-abonements')
+  // @UseGuards(UseGuards)
+  async getGymAbonements(
+    @Body() body: GetGymAbonementsRequest,
+  ): Promise<AbonementDto[]> {
+    const { gymId } = body
+
+    const gym = await this.gymService.findOne({ id: gymId as nowId })
+    if (!gym) {
+      throw new BadRequestException(`Не найден зал с id: ${gymId}`)
+    }
+
+    const abonements = await this.abonementService.findMany(
+      {
+        gym: { id: gymId as nowId },
+      },
+      [CREATOR_RELATION],
+    )
 
     return abonements.map(transformAbonement)
   }
 
   @Post('create')
   @UseGuards(TrainerGuard)
-  async create(@Body() body: CreateAbonementDto): Promise<AbonementDto> {
-    const { creatorId: userId, gymId: gymId, ...data } = body
+  async create(@Body() body: CreateAbonementDto): Promise<{ message: string }> {
+    const { creatorId: userId, gymIds, ...data } = body
 
     const creator = await this.userService.findOne({ id: userId as nowId })
     if (!creator) {
       throw new BadRequestException(`Не найден пользователь с id: '${userId}'`)
     }
 
-    const gym = await this.gymService.findOne({ id: gymId as nowId })
-    if (!gym) {
-      throw new BadRequestException(`Не найден зал с id: '${gymId}'`)
+    const { entities: gyms, isRangeCorrect } =
+      await this.gymService.findInRangeId(gymIds)
+    if (!isRangeCorrect) {
+      throw new BadRequestException(`Не верно заданы id залов: ${gymIds}`)
     }
 
-    const newAbonement = await this.abonementService.create({
-      ...data,
-      creator,
-      gym,
-    })
+    for (let i = 0; i < gyms.length; i++) {
+      await this.abonementService.create({
+        ...data,
+        creator,
+        gym: { id: gyms[i].id },
+      })
+    }
+    // const gym = await this.gymService.findOne({ id: gymId as nowId })
+    // if (!gym) {
+    // throw new BadRequestException(`Не найден зал с id: ${gymId}`)
+    // }
 
-    return transformAbonement(newAbonement)
+    // const newAbonement = await this.abonementService.create({
+    //   ...data,
+    //   creator,
+    //   gym,
+    // })
+
+    // return transformAbonement(newAbonement)
+    return { message: 'Абонементы созданы успешно' }
   }
 
   @Post('assign-abonement')
@@ -195,6 +215,7 @@ export class AbonementController {
 
     const learnerAssigned = await this.learnerAbonementService.findOne({
       learner: { id: learnerId as nowId },
+      abonement: { id: abonementId as nowId },
     })
     if (learnerAssigned) {
       throw new BadRequestException(

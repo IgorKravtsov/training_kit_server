@@ -29,7 +29,7 @@ const checkIsMarkedAlready = (training: Training, learner: User): boolean => {
   return !!foundLearner
 }
 
-const checkCanVisitDateTime = (trainingDate: Date | string): boolean => {
+export const checkCanVisitDateTime = (trainingDate: Date | string): boolean => {
   if (!trainingDate) return false
 
   const tDate = new Date(trainingDate)

@@ -15,3 +15,4 @@ export const GYM_RELATION = 'gym'
 
 export const LEARNER_RELATION = 'learner'
 export const ABONEMENT_RELATION = 'abonement'
+export const CREATOR_RELATION = 'creator'

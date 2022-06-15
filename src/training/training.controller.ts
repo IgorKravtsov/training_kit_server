@@ -28,6 +28,7 @@ import {
 } from 'src/common/constants'
 import { MarkVisitingTrainingRequest } from './types/mark-visiting-training.type'
 import { User } from '../user/user.entity'
+import { checkCanVisitDateTime } from 'src/utils/check-can-visit.util'
 
 @Controller('training')
 export class TrainingController {
@@ -217,6 +218,12 @@ export class TrainingController {
       return {
         message: `Пользователь с id: ${userId} уже записан на тренеровку с id: ${trainingId}`,
       }
+    }
+
+    if (!checkCanVisitDateTime(training.trainingDateTime)) {
+      throw new BadRequestException(
+        `Нельзя записаться на тренеровку с id: ${trainingId}. Неподходящее время`,
+      )
     }
 
     let trainingLearners: User[] = []
