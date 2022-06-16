@@ -20,13 +20,14 @@ import {
 } from 'src/common/constants'
 import {
   AssignToTrainersDto,
+  ChangeLangDto,
   GetTrainersToAssignDto,
   PublicUserDto,
   UpdateUserDto,
   UserDto,
 } from './dtos'
 import { UserService } from './user.service'
-import { UserRoles } from './enums'
+import { LanguageType, UserRoles } from './enums'
 
 @Controller('user')
 export class UserController {
@@ -35,7 +36,19 @@ export class UserController {
   @Put('update/:userId')
   // @Serialize(UserDto)
   async update(@Param('userId') userId: Id, @Body() body: UpdateUserDto) {
-    return await this.userService.updateUser(userId, body)
+    const updatedUser = await this.userService.updateUser(userId, body)
+    return transformUser(updatedUser)
+  }
+
+  @Put('change-language/:userId')
+  // @Serialize(UserDto)
+  async changeLang(@Param('userId') userId: Id, @Body() body: ChangeLangDto) {
+    const { lang } = body
+    if (!Object.values(LanguageType).includes(lang)) {
+      throw new BadRequestException(`Неверный тип языка: ${lang}`)
+    }
+    const updatedUser = await this.userService.updateLang(userId, body)
+    return transformUser(updatedUser)
   }
 
   @Delete('delete/:userId')

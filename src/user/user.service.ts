@@ -1,10 +1,19 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { AbstractService } from 'src/common/abstract.service'
-import { ORGANIZATION_TABLE, USER_TABLE } from 'src/common/constants'
+import {
+  ABONEMENT_TABLE,
+  CHARACTERISTIC_TABLE,
+  GYM_TABLE,
+  LEARNER_ABONEMENT_RELATION,
+  ORGANIZATION_TABLE,
+  TRAINERS_RELATION,
+  USER_TABLE,
+} from 'src/common/constants'
 import { PaginatedResult } from 'src/common/interfaces'
 import { Id } from 'src/common/types'
 import { FindOptionsOrder, In, Like, Repository } from 'typeorm'
+import { ChangeLangDto } from './dtos'
 import { UpdateUserDto } from './dtos/update-user.dto'
 import { UserRoles } from './enums'
 import { User } from './user.entity'
@@ -37,7 +46,33 @@ export class UserService extends AbstractService<User> {
     })
     return await this.userRepository.findOne({
       where: { id } as any,
-      relations: [ORGANIZATION_TABLE],
+      relations: [
+        TRAINERS_RELATION,
+        LEARNER_ABONEMENT_RELATION,
+        ABONEMENT_TABLE,
+        ORGANIZATION_TABLE,
+        CHARACTERISTIC_TABLE,
+        GYM_TABLE,
+      ],
+    })
+  }
+
+  async updateLang(id: Id, body: ChangeLangDto): Promise<User> {
+    // const { organizations, ...data } = body
+
+    await super.update(id, {
+      lang: body.lang,
+    })
+    return await this.userRepository.findOne({
+      where: { id } as any,
+      relations: [
+        TRAINERS_RELATION,
+        LEARNER_ABONEMENT_RELATION,
+        ABONEMENT_TABLE,
+        ORGANIZATION_TABLE,
+        CHARACTERISTIC_TABLE,
+        GYM_TABLE,
+      ],
     })
   }
 

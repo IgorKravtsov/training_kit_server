@@ -33,7 +33,7 @@ export class User extends CommonEntity {
   @Column({ enum: UserRoles, default: UserRoles.LEARNER })
   role: UserRoles
 
-  @Column({ enum: LanguageType, default: LanguageType.RU })
+  @Column({ enum: LanguageType, default: LanguageType.Russian })
   lang: LanguageType
 
   @Column({ nullable: true })
