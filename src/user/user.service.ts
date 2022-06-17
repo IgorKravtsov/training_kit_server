@@ -8,11 +8,12 @@ import {
   LEARNER_ABONEMENT_RELATION,
   ORGANIZATION_TABLE,
   TRAINERS_RELATION,
+  TRAINER_LEARNER_TABLE,
   USER_TABLE,
 } from 'src/common/constants'
 import { PaginatedResult } from 'src/common/interfaces'
 import { Id } from 'src/common/types'
-import { FindOptionsOrder, In, Like, Repository } from 'typeorm'
+import { FindOptionsOrder, In, Repository } from 'typeorm'
 import { ChangeLangDto } from './dtos'
 import { UpdateUserDto } from './dtos/update-user.dto'
 import { UserRoles } from './enums'
@@ -103,5 +104,43 @@ export class UserService extends AbstractService<User> {
         },
       )
       .getMany()
+  }
+
+  async findLearnerByNameLastNameOrEmail(search: string): Promise<User[]> {
+    return await this.repository
+      .createQueryBuilder(USER_TABLE)
+      .where(
+        'role=:learner AND (name LIKE :search OR lastName LIKE :search OR email LIKE :search)',
+        {
+          search: `%${search}%`,
+          learner: UserRoles.LEARNER,
+        },
+      )
+      .getMany()
+  }
+
+  async getTrainerLearners(trainerId: Id): Promise<User[]> {
+    const t = await this.repository.query(
+      `SELECT * FROM users WHERE id IN 
+      (SELECT learnerId FROM users u
+      INNER JOIN trainer_learner tl ON u.id=tl.trainerId
+      WHERE tl.trainerId=${trainerId})`,
+    )
+    // .createQueryBuilder(TRAINER_LEARNER_TABLE)
+    // .where('trainerId=:trainerId', {
+    //   trainerId,
+    // })
+    // .getMany()
+    return t
+  }
+
+  async addLeanersToTrainer(trainerId: Id, learnerIds: Id[]) {
+    for (const learnerId of learnerIds) {
+      await this.repository
+        .query(`INSERT INTO ${TRAINER_LEARNER_TABLE} (trainerId, learnerId)
+      VALUES (${trainerId}, ${learnerId})
+      `)
+    }
+    return { message: 'ok' }
   }
 }

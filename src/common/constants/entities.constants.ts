@@ -1,4 +1,5 @@
 export const USER_TABLE = 'users'
+export const TRAINER_LEARNER_TABLE = 'trainer_learner'
 export const ORGANIZATION_TABLE = 'organizations'
 export const CHARACTERISTIC_TABLE = 'characteristics'
 export const GYM_TABLE = 'gyms'

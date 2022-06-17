@@ -14,13 +14,17 @@ import {
   ABONEMENT_TABLE,
   CHARACTERISTIC_TABLE,
   GYM_TABLE,
+  LEARNERS_RELATION,
   LEARNER_ABONEMENT_RELATION,
   ORGANIZATION_TABLE,
   TRAINERS_RELATION,
 } from 'src/common/constants'
 import {
+  AssignLearnersDto,
   AssignToTrainersDto,
   ChangeLangDto,
+  GetLearnersToAssignDto,
+  GetTrainerLearnersDto,
   GetTrainersToAssignDto,
   PublicUserDto,
   UpdateUserDto,
@@ -98,6 +102,38 @@ export class UserController {
     return transformUser(updatedLearner)
   }
 
+  @Post('assign-learners')
+  async assignLearner(@Body() body: AssignLearnersDto) {
+    const { learnerIds, trainerId } = body
+    let resMessage = 'ok'
+
+    const { isRangeCorrect, entities: learnersToAssign } =
+      await this.userService.findInRangeId(learnerIds)
+
+    if (!isRangeCorrect) {
+      throw new BadRequestException(
+        `Заданы не верные id учеников: ${learnerIds}`,
+      )
+    }
+
+    const trainer = await this.userService.findOne({ id: trainerId as nowId })
+    if (!trainer) {
+      throw new BadRequestException(`Не найден тренер с id: ${trainerId}`)
+    }
+    const trainerLearners = await this.userService.getTrainerLearners(trainerId)
+
+    const newLearners = arrDiff(learnersToAssign, trainerLearners)
+    if (newLearners.length === 0) {
+      resMessage = 'Все ученики уже являются Вашими'
+    }
+
+    await this.userService.addLeanersToTrainer(
+      trainerId,
+      newLearners.map((nl) => nl.id),
+    )
+    return { message: resMessage }
+  }
+
   @Post('get-trainers-to-assign')
   async getTrainersToAssign(
     @Body() body: GetTrainersToAssignDto,
@@ -106,5 +142,34 @@ export class UserController {
     const trainers = await this.userService.findByNameLastNameOrEmail(trainer)
 
     return trainers.map(transformPublicUser)
+  }
+
+  @Post('get-learners-to-assign')
+  async getLearnersToAssign(
+    @Body() body: GetLearnersToAssignDto,
+  ): Promise<PublicUserDto[]> {
+    const { learner } = body
+
+    const learners = await this.userService.findLearnerByNameLastNameOrEmail(
+      learner,
+    )
+
+    return learners.map(transformPublicUser)
+  }
+
+  @Post('get-trainer-learners')
+  async getTrainerLearners(
+    @Body() body: GetTrainerLearnersDto,
+  ): Promise<PublicUserDto[]> {
+    const { trainerId } = body
+
+    const trainer = await this.userService.findOne({ id: trainerId as nowId })
+    if (!trainer) {
+      throw new BadRequestException(`Не найден тренер с id: ${trainerId}`)
+    }
+
+    const learners = await this.userService.getTrainerLearners(trainerId)
+
+    return learners.map(transformPublicUser)
   }
 }
