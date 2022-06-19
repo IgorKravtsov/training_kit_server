@@ -7,6 +7,8 @@ export const TRAINER_GYM_TABLE = 'trainer_gym'
 export const TRAINING_TABLE = 'trainings'
 export const ABONEMENT_TABLE = 'abonements'
 export const LEARNER_ABONEMENT_TABLE = 'learner_abonement'
+export const TRAINING_LEARNER_TABLE = 'training_learner'
+export const TRAINING_TRAINER_TABLE = 'training_trainer'
 
 export const TRAINERS_RELATION = 'trainers'
 export const LEARNERS_RELATION = 'learners'

@@ -13,8 +13,8 @@ import { Id, nowId } from 'src/common/types'
 import { GymService } from 'src/gym/gym.service'
 import { UserRoles } from 'src/user/enums'
 import { UserService } from 'src/user/user.service'
-import { transformTraining } from 'src/utils/transform'
-import { CreateTrainingDto, TrainingDto } from './dtos'
+import { transformPublicUser, transformTraining } from 'src/utils/transform'
+import { CreateTrainingDto, GetTrainingLearners, TrainingDto } from './dtos'
 import { TrainingService } from './training.service'
 import {
   GetLearnerTrainingHistoryResponse,
@@ -29,6 +29,7 @@ import {
 import { MarkVisitingTrainingRequest } from './types/mark-visiting-training.type'
 import { User } from '../user/user.entity'
 import { checkCanVisitDateTime } from 'src/utils/check-can-visit.util'
+import { PublicUserDto } from 'src/user/dtos'
 
 @Controller('training')
 export class TrainingController {
@@ -147,49 +148,26 @@ export class TrainingController {
     }
   }
 
-  // @Post('get-user-trainings')
-  // async getUserTrainings(@Body() body: GetUserTrainingsRequest) {
-  //   const {
-  //     trainerIds,
-  //     startDate: clientStartDate,
-  //     endDate: clientEndDate,
-  //   } = body
-  //   const startDate = new Date(clientStartDate)
-  //   const endDate = new Date(clientEndDate)
-  //
-  //   if (startDate > endDate) {
-  //     throw new NotFoundException(`Задан неверный диапазон дат`)
-  //   }
-  //
-  //   startDate.setDate(startDate.getDate() - 1)
-  //   endDate.setDate(endDate.getDate() + 1)
-  //
-  //   const { isRangeCorrect } = await this.userService.findInRangeId(
-  //     trainerIds,
-  //     {},
-  //     [UserRoles.TRAINER, UserRoles.ADMIN],
-  //   )
-  //   if (!isRangeCorrect) {
-  //     throw new NotFoundException(`Заданы неверные id тренера(-ов)`)
-  //   }
-  //
-  //   const trainings = await this.trainingService.findMany(
-  //     {
-  //       // trainers: In(trainerIds.map((id) => ({ id }))),
-  //       trainingDateTime: Between(startDate, endDate),
-  //     },
-  //     [TRAINERS_RELATION, LEARNERS_RELATION, GYM_RELATION],
-  //   )
-  //   const gymTrainings = this.trainingService.convertGymTraining(
-  //     trainings,
-  //     trainerIds,
-  //   )
-  //
-  //   return {
-  //     totalCount: gymTrainings.length,
-  //     trainings: gymTrainings,
-  //   }
-  // }
+  @Post('get-training-learners')
+  async getTrainerLearners(
+    @Body() body: GetTrainingLearners,
+  ): Promise<PublicUserDto[]> {
+    const { trainingId } = body
+
+    const training = await this.trainingService.findOne(
+      {
+        id: trainingId as nowId,
+      },
+      [LEARNERS_RELATION],
+    )
+    if (!training) {
+      throw new BadRequestException(`Не найден тренер с id: ${trainingId}`)
+    }
+
+    // const learners = await this.trainingService.getTrainingLearners(trainingId)
+
+    return training.learners.map(transformPublicUser)
+  }
 
   @Post('mark-visiting-training')
   async markVisitingTraining(@Body() body: MarkVisitingTrainingRequest) {

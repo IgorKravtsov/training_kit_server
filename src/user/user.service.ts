@@ -9,15 +9,24 @@ import {
   ORGANIZATION_TABLE,
   TRAINERS_RELATION,
   TRAINER_LEARNER_TABLE,
+  TRAINING_TABLE,
+  TRAINING_TRAINER_TABLE,
   USER_TABLE,
 } from 'src/common/constants'
 import { PaginatedResult } from 'src/common/interfaces'
 import { Id } from 'src/common/types'
+import { Training } from 'src/training/training.entity'
 import { FindOptionsOrder, In, Repository } from 'typeorm'
 import { ChangeLangDto } from './dtos'
 import { UpdateUserDto } from './dtos/update-user.dto'
 import { UserRoles } from './enums'
 import { User } from './user.entity'
+
+// interface GymTraining extends Training {
+//   address: string
+//   img?: string
+//   gymId: number
+// }
 
 @Injectable()
 export class UserService extends AbstractService<User> {
@@ -26,6 +35,17 @@ export class UserService extends AbstractService<User> {
   ) {
     super(userRepository)
   }
+
+  // transformGymTraining(gymTraining: GymTraining): Training {
+  //   return {
+  //     ...gymTraining,
+  //     gym: {
+  //       id: gymTraining.gymId,
+  //       address: gymTraining.address,
+  //       img: gymTraining.img,
+  //     },
+  //   }
+  // }
 
   async paginate(page = 1, relations = []): Promise<PaginatedResult<User>> {
     const { data, meta } = await super.paginate(page, relations)
@@ -125,6 +145,23 @@ export class UserService extends AbstractService<User> {
       (SELECT learnerId FROM users u
       INNER JOIN trainer_learner tl ON u.id=tl.trainerId
       WHERE tl.trainerId=${trainerId})`,
+    )
+    // .createQueryBuilder(TRAINER_LEARNER_TABLE)
+    // .where('trainerId=:trainerId', {
+    //   trainerId,
+    // })
+    // .getMany()
+    return t
+  }
+
+  async getTrainerTrainings(trainerId: Id): Promise<Training[]> {
+    const t = await this.repository.query(
+      `SELECT * FROM ${TRAINING_TABLE} ot 
+      INNER JOIN ${GYM_TABLE} g ON g.id=ot.gymId
+      WHERE ot.id IN 
+      (SELECT trainingId FROM trainings t
+      INNER JOIN ${TRAINING_TRAINER_TABLE} tt ON t.id=tt.trainingId
+      WHERE tt.trainerId=${trainerId})`,
     )
     // .createQueryBuilder(TRAINER_LEARNER_TABLE)
     // .where('trainerId=:trainerId', {

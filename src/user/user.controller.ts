@@ -8,7 +8,11 @@ import {
   Put,
 } from '@nestjs/common'
 import { Id, nowId } from 'src/common/types'
-import { transformPublicUser, transformUser } from 'src/utils/transform'
+import {
+  transformPublicUser,
+  transformTraining,
+  transformUser,
+} from 'src/utils/transform'
 import { arrDiff } from 'src/utils'
 import {
   ABONEMENT_TABLE,
@@ -26,12 +30,14 @@ import {
   GetLearnersToAssignDto,
   GetTrainerLearnersDto,
   GetTrainersToAssignDto,
+  GetTrainerTrainingsDto,
   PublicUserDto,
   UpdateUserDto,
   UserDto,
 } from './dtos'
 import { UserService } from './user.service'
 import { LanguageType, UserRoles } from './enums'
+import { TrainingDto } from 'src/training/dtos'
 
 @Controller('user')
 export class UserController {
@@ -171,5 +177,25 @@ export class UserController {
     const learners = await this.userService.getTrainerLearners(trainerId)
 
     return learners.map(transformPublicUser)
+  }
+
+  @Post('get-trainer-trainings')
+  async getTrainerTrainings(
+    @Body() body: GetTrainerTrainingsDto,
+  ): Promise<TrainingDto[]> {
+    const { trainerId } = body
+
+    const trainer = await this.userService.findOne({
+      id: trainerId as nowId,
+    })
+    if (!trainer) {
+      throw new BadRequestException(`Не найден тренер с id: ${trainerId}`)
+    }
+
+    const trainings = await this.userService.getTrainerTrainings(trainerId)
+    
+    console.log(trainings[0])
+
+    return trainings.map(transformTraining)
   }
 }

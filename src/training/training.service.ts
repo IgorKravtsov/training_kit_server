@@ -9,6 +9,7 @@ import { Training } from './training.entity'
 import { GymTraining } from './types'
 import { User } from '../user/user.entity'
 import { TrainingDto } from './dtos'
+import { TRAINING_LEARNER_TABLE } from 'src/common/constants'
 
 @Injectable()
 export class TrainingService extends AbstractService<Training> {
@@ -62,5 +63,20 @@ export class TrainingService extends AbstractService<Training> {
       }
     }
     return res
+  }
+
+  async getTrainingLearners(trainingId: Id) {
+    const t = await this.repository.query(
+      `SELECT * FROM users WHERE id IN 
+      (SELECT learnerId FROM users u
+      INNER JOIN ${TRAINING_LEARNER_TABLE} tl ON u.id=tl.learnerId
+      WHERE tl.trainingId=${trainingId})`,
+    )
+    // .createQueryBuilder(TRAINER_LEARNER_TABLE)
+    // .where('trainerId=:trainerId', {
+    //   trainerId,
+    // })
+    // .getMany()
+    return t
   }
 }
