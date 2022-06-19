@@ -21,9 +21,9 @@ export const transformTraining = (training: Training): TrainingDto => {
     id,
     title,
     description,
-    trainers: trainers && trainers.map((t) => transformPublicUser(t)),
-    learners: learners && learners.map((l) => transformPublicUser(l)),
-    gym: transformGym(gym),
+    trainers: trainers && trainers.map(transformPublicUser),
+    learners: learners && learners.map(transformPublicUser),
+    gym: gym && transformGym(gym),
     trainingDateTime,
     // trainingTime,
   }

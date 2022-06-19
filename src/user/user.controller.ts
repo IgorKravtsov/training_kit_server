@@ -193,8 +193,6 @@ export class UserController {
     }
 
     const trainings = await this.userService.getTrainerTrainings(trainerId)
-    
-    console.log(trainings[0])
 
     return trainings.map(transformTraining)
   }
