@@ -192,7 +192,8 @@ export class UserController {
       throw new BadRequestException(`Не найден тренер с id: ${trainerId}`)
     }
 
-    const trainings = await this.userService.getTrainerTrainings(trainerId)
+    let trainings = await this.userService.getTrainerTrainings(trainerId)
+    trainings = this.userService.deleteDuplicates(trainings)
 
     return trainings.map(transformTraining)
   }

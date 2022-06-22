@@ -116,7 +116,6 @@ export class AuthController {
     return transformUser(user)
   }
 
-  @UseGuards(AuthGuard)
   @Post('auth/logout')
   async logout(@Res({ passthrough: true }) response: Response) {
     response.clearCookie(USER_IN_COOKIE)
