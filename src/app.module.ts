@@ -18,12 +18,12 @@ import { AbonementModule } from './abonement/abonement.module'
     //   inject: [ConfigService],
     //   useFactory: getTypeormConfig,
     // }),
-    TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: 'db.sqlite',
-      autoLoadEntities: true,
-      synchronize: true,
-    }),
+      TypeOrmModule.forRoot({
+        type: 'sqlite',
+        database: 'db.sqlite',
+        autoLoadEntities: true,
+        synchronize: true,
+      }),
     UserModule,
     AuthModule,
     OrganizationModule,

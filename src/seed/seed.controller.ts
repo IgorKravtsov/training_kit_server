@@ -233,7 +233,7 @@ export class SeedController {
       {
         title: 'Ката (старшая группа)',
         description: 'Ката. Много ката',
-        trainingDateTime: new Date('2022-03-15 15:00:00'),
+        trainingDateTime: new Date('2022-06-30 15:00:00'),
         // trainingTime: new Date('2021-03-15 15:00:00'),
         gymId: 1,
         trainers: [1, 2],
@@ -242,7 +242,7 @@ export class SeedController {
       {
         title: 'Кумите (младшая группа)',
         description: 'Кумите. Не забудьте защиту на руки и ноги',
-        trainingDateTime: new Date('2020-03-15 15:00:00'),
+        trainingDateTime: new Date('2022-06-30 17:00:00'),
         // trainingTime: new Date('2021-03-15 15:00:00'),
         gymId: 3,
         trainers: [2],
@@ -251,7 +251,7 @@ export class SeedController {
       {
         title: 'Кумите (средняя группа)',
         description: 'Кумите. Не забудьте защиту на руки и ноги',
-        trainingDateTime: new Date('2021-03-15 15:00:00'),
+        trainingDateTime: new Date('2022-06-30 20:00:00'),
         // trainingTime: new Date('2021-03-15 15:00:00'),
         gymId: 2,
         trainers: [1, 2],
@@ -284,10 +284,11 @@ export class SeedController {
         ...data,
         gym,
         trainers,
+        learners: learnerIds.map((id) => ({ id: id as nowId })),
       })
       // await this.trainingService.create(newTraining)
-      learnerIds &&
-        (await this.markVisitingTraining(learnerIds, newTraining.id))
+      // learnerIds &&
+      //   (await this.markVisitingTraining(learnerIds, newTraining.id))
     }
 
     return 'Trainings seeded successfully'

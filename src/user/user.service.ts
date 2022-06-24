@@ -48,17 +48,6 @@ export class UserService extends AbstractService<User> {
   // }
 
   deleteDuplicates<T extends { id: Id }>(arr: T[]): T[] {
-    // const res: T[] = []
-    // for (const item1 of arr1) {
-    //   for (const item2 of arr1) {
-    //     if (item1[key] === item2[key]) {
-    //       break
-    //     } else {
-    //       res.push(item1)
-    //     }
-    //   }
-    // }
-    // return res
     return arr.reduce((acc, n) => {
       const i = acc.findIndex((m) => m.id === n.id)
       if (!~i || !acc[i].checked) {
