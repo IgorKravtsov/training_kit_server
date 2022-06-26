@@ -8,7 +8,7 @@ import {
   Param,
   Post,
 } from '@nestjs/common'
-import { Between } from 'typeorm'
+import { Between, In } from 'typeorm'
 import { Id, nowId } from 'src/common/types'
 import { GymService } from 'src/gym/gym.service'
 import { UserRoles } from 'src/user/enums'
@@ -221,5 +221,30 @@ export class TrainingController {
     return {
       message: `Пользователь с id: ${userId} успешно записан на тренеровку ${trainingId}`,
     }
+  }
+
+  @Post('get-trainer-trainings')
+  async getTrainerTrainings(
+    @Body() body: { trainerId: Id },
+  ): Promise<TrainingDto[]> {
+    const { trainerId } = body
+
+    const trainer = await this.userService.findOne({
+      id: trainerId as nowId,
+    })
+    if (!trainer) {
+      throw new BadRequestException(`Не найден тренер с id: ${trainerId}`)
+    }
+
+    const trainings = await this.trainingService.findMany(
+      {
+        trainers: { id: trainerId as nowId },
+      },
+      [GYM_RELATION],
+    )
+    // let trainings = await this.userService.getTrainerTrainings(trainerId)
+    // trainings = this.userService.deleteDuplicates(trainings)
+
+    return trainings.map(transformTraining)
   }
 }
