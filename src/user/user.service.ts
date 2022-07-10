@@ -22,12 +22,6 @@ import { UpdateUserDto } from './dtos/update-user.dto'
 import { UserRoles } from './enums'
 import { User } from './user.entity'
 
-// interface GymTraining extends Training {
-//   address: string
-//   img?: string
-//   gymId: number
-// }
-
 @Injectable()
 export class UserService extends AbstractService<User> {
   constructor(
@@ -35,17 +29,6 @@ export class UserService extends AbstractService<User> {
   ) {
     super(userRepository)
   }
-
-  // transformGymTraining(gymTraining: GymTraining): Training {
-  //   return {
-  //     ...gymTraining,
-  //     gym: {
-  //       id: gymTraining.gymId,
-  //       address: gymTraining.address,
-  //       img: gymTraining.img,
-  //     },
-  //   }
-  // }
 
   deleteDuplicates<T extends { id: Id }>(arr: T[]): T[] {
     return arr.reduce((acc, n) => {
@@ -129,7 +112,7 @@ export class UserService extends AbstractService<User> {
     return await this.repository
       .createQueryBuilder(USER_TABLE)
       .where(
-        'role=:trainer OR role=:admin AND (name LIKE :search OR lastName LIKE :search OR email LIKE :search)',
+        'role=:trainer OR role=:admin AND (name LIKE :search OR last_name LIKE :search OR email LIKE :search)',
         {
           search: `%${search}%`,
           trainer: UserRoles.TRAINER,
@@ -143,7 +126,7 @@ export class UserService extends AbstractService<User> {
     return await this.repository
       .createQueryBuilder(USER_TABLE)
       .where(
-        'role=:learner AND (name LIKE :search OR lastName LIKE :search OR email LIKE :search)',
+        'role=:learner AND (name LIKE :search OR last_name LIKE :search OR email LIKE :search)',
         {
           search: `%${search}%`,
           learner: UserRoles.LEARNER,
@@ -155,9 +138,9 @@ export class UserService extends AbstractService<User> {
   async getTrainerLearners(trainerId: Id): Promise<User[]> {
     const t = await this.repository.query(
       `SELECT * FROM users WHERE id IN 
-      (SELECT learnerId FROM users u
-      INNER JOIN trainer_learner tl ON u.id=tl.trainerId
-      WHERE tl.trainerId=${trainerId})`,
+      (SELECT learner_id FROM users u
+      INNER JOIN trainer_learner tl ON u.id=tl.trainer_id
+      WHERE tl.trainer_id=${trainerId})`,
     )
     // .createQueryBuilder(TRAINER_LEARNER_TABLE)
     // .where('trainerId=:trainerId', {
@@ -170,11 +153,11 @@ export class UserService extends AbstractService<User> {
   async getTrainerTrainings(trainerId: Id): Promise<Training[]> {
     const t = await this.repository.query(
       `SELECT * FROM ${TRAINING_TABLE} ot 
-      INNER JOIN ${GYM_TABLE} g ON g.id=ot.gymId
+      INNER JOIN ${GYM_TABLE} g ON g.id=ot.gym_id
       WHERE ot.id IN 
-      (SELECT trainingId FROM trainings t
-      INNER JOIN ${TRAINING_TRAINER_TABLE} tt ON t.id=tt.trainingId
-      WHERE tt.trainerId=${trainerId})`,
+      (SELECT training_id FROM trainings t
+      INNER JOIN ${TRAINING_TRAINER_TABLE} tt ON t.id=tt.training_id
+      WHERE tt.trainer_id=${trainerId})`,
     )
     // .createQueryBuilder(TRAINER_LEARNER_TABLE)
     // .where('trainerId=:trainerId', {
@@ -187,7 +170,7 @@ export class UserService extends AbstractService<User> {
   async addLeanersToTrainer(trainerId: Id, learnerIds: Id[]) {
     for (const learnerId of learnerIds) {
       await this.repository
-        .query(`INSERT INTO ${TRAINER_LEARNER_TABLE} (trainerId, learnerId)
+        .query(`INSERT INTO ${TRAINER_LEARNER_TABLE} (trainer_id, learner_id)
       VALUES (${trainerId}, ${learnerId})
       `)
     }

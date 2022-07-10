@@ -25,8 +25,8 @@ export class Gym extends CommonEntity {
   @ManyToMany(() => User, { onDelete: 'SET NULL' })
   @JoinTable({
     name: TRAINER_GYM_TABLE,
-    joinColumn: { name: 'gymId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'trainerId', referencedColumnName: 'id' },
+    joinColumn: { name: 'gym_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'trainer_id', referencedColumnName: 'id' },
   })
   trainers: User[]
 }

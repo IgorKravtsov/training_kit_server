@@ -24,16 +24,16 @@ export class Training extends CommonEntity {
   @ManyToMany(() => User, { onDelete: 'NO ACTION' })
   @JoinTable({
     name: 'training_learner',
-    joinColumn: { name: 'trainingId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'learnerId', referencedColumnName: 'id' },
+    joinColumn: { name: 'training_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'learner_id', referencedColumnName: 'id' },
   })
   learners: User[]
 
   @ManyToMany(() => User, { onDelete: 'NO ACTION' })
   @JoinTable({
     name: 'training_trainer',
-    joinColumn: { name: 'trainingId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'trainerId', referencedColumnName: 'id' },
+    joinColumn: { name: 'training_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'trainer_id', referencedColumnName: 'id' },
   })
   trainers: User[]
 }

@@ -24,7 +24,7 @@ export class User extends CommonEntity {
   @Column()
   name: string
 
-  @Column()
+  @Column({ name: 'last_name' })
   lastName: string
 
   @Column()
@@ -51,37 +51,27 @@ export class User extends CommonEntity {
   @OneToMany(() => Characteristic, (c) => c.user)
   characteristics: Characteristic[]
 
-  // @ManyToOne(() => User, (u) => u.trainer)
-  // trainer: User
-
   @ManyToMany(() => User, { onDelete: 'CASCADE' })
   @JoinTable({
     name: 'trainer_learner',
-    joinColumn: { name: 'learnerId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'trainerId', referencedColumnName: 'id' },
+    joinColumn: { name: 'learner_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'trainer_id', referencedColumnName: 'id' },
   })
   trainers?: User[]
 
   @ManyToMany(() => Organization, { onDelete: 'CASCADE' })
   @JoinTable({
     name: 'organization_user',
-    joinColumn: { name: 'userId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'organizationId', referencedColumnName: 'id' },
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'organization_id', referencedColumnName: 'id' },
   })
   organizations: Organization[]
 
   @ManyToMany(() => Gym, { onDelete: 'SET NULL' })
   @JoinTable({
     name: TRAINER_GYM_TABLE,
-    joinColumn: { name: 'trainerId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'gymId', referencedColumnName: 'id' },
+    joinColumn: { name: 'trainer_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'gym_id', referencedColumnName: 'id' },
   })
   gyms: Gym[]
-
-  // @OneToMany(() => Abonement, )
-
-  // @Expose()
-  // get displayName(): string {
-  //   return `${this.name} ${this.lastName}`
-  // }
 }

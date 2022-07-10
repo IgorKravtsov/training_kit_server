@@ -8,11 +8,13 @@ import {
   UpdateResult,
 } from 'typeorm'
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
+import { CommonEntity } from './entities'
 import { PaginatedResult } from './interfaces'
 import { Id } from './types'
 
 @Injectable()
-export abstract class AbstractService<Entity extends { id: Id }> {
+export abstract class AbstractService<Entity extends CommonEntity> {
+  
   protected constructor(protected readonly repository: Repository<Entity>) {}
 
   async all(relations: string[] = []): Promise<Entity[]> {

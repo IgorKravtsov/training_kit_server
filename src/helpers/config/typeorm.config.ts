@@ -8,7 +8,6 @@ export const getTypeormConfig = async (
   return {
     ...getPostgresConfig(configService),
     type: 'postgres',
-    // entities: [__dirname + '/*/*.entity{.ts,.js}'],
     autoLoadEntities: true,
     synchronize: true,
     migrations: [__dirname + '/migrations/**/*{.ts,.js}'],

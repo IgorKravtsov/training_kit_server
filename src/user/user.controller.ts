@@ -6,6 +6,8 @@ import {
   Param,
   Post,
   Put,
+  Req,
+  UseGuards,
 } from '@nestjs/common'
 import { Id, nowId } from 'src/common/types'
 import {
@@ -38,6 +40,8 @@ import {
 import { UserService } from './user.service'
 import { LanguageType, UserRoles } from './enums'
 import { TrainingDto } from 'src/training/dtos'
+import { AuthGuard } from './guards'
+import { Request } from 'express'
 
 @Controller('user')
 export class UserController {
@@ -141,13 +145,18 @@ export class UserController {
   }
 
   @Post('get-trainers-to-assign')
+  @UseGuards(AuthGuard)
   async getTrainersToAssign(
     @Body() body: GetTrainersToAssignDto,
+    @Req() request: Request,
   ): Promise<PublicUserDto[]> {
+    const { currentUser } = request
     const { trainer } = body
     const trainers = await this.userService.findByNameLastNameOrEmail(trainer)
 
-    return trainers.map(transformPublicUser)
+    return trainers
+      .filter((t) => t.id !== currentUser.id)
+      .map(transformPublicUser)
   }
 
   @Post('get-learners-to-assign')
